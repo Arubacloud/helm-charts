@@ -1,0 +1,82 @@
+      - name: Check chart structure and documentation
+        run: |
+          for dir in charts/*/; do
+            if [ ! -f "$dir/Chart.yaml" ]; then
+              echo "Missing Chart.yaml in $dir";
+              exit 1;
+            fi
+            if [ ! -f "$dir/values.yaml" ]; then
+              echo "Missing values.yaml in $dir";
+              exit 1;
+            fi
+            if [ ! -f "$dir/README.md" ]; then
+              echo "Missing README.md in $dir";
+              exit 1;
+            fi
+          done
+name: Publish Helm Charts to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check chart structure and documentation
+        run: |
+          for dir in charts/*/; do
+            if [ ! -f "$dir/Chart.yaml" ]; then
+              echo "Missing Chart.yaml in $dir";
+              exit 1;
+            fi
+            if [ ! -f "$dir/values.yaml" ]; then
+              echo "Missing values.yaml in $dir";
+              exit 1;
+            fi
+            if [ ! -f "$dir/README.md" ]; then
+              echo "Missing README.md in $dir";
+              exit 1;
+            fi
+          done
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - name: Install helm-docs
+        run: |
+          wget https://github.com/norwoodj/helm-docs/releases/download/v1.11.0/helm-docs_1.11.0_Linux_x86_64.tar.gz -O helm-docs.tar.gz
+          tar -xzf helm-docs.tar.gz helm-docs
+          chmod +x helm-docs
+          sudo mv helm-docs /usr/local/bin/helm-docs
+
+      - name: Generate documentation for charts
+        run: |
+          for dir in charts/*/; do
+            helm-docs --chart-search-root "$dir"
+          done
+
+      - name: Package all charts
+        run: |
+          mkdir -p packaged
+          for dir in charts/*/; do
+            helm package "$dir" -d packaged
+          done
+
+      - name: Generate index.yaml
+        run: |
+          helm repo index packaged --url https://arubacloud.github.io/helm-charts/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: packaged
+          destination_dir: docs

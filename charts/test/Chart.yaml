@@ -1,0 +1,7 @@
+apiVersion: v2
+name: copilot
+version: 0.1.0
+description: Example Helm chart for Aruba Cloud
+maintainers:
+  - name: Aruba Cloud
+    email: support@arubacloud.com

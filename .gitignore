@@ -1,0 +1,24 @@
+# Ignore packaged charts
+packaged/
+
+# Ignore Helm chart build artifacts
+*.tgz
+
+# Ignore editor and OS files
+.DS_Store
+*.swp
+*.swo
+*.bak
+
+# Ignore logs
+*.log
+
+# Ignore node_modules (if any)
+node_modules/
+
+# Ignore Python cache (if any)
+__pycache__/
+*.pyc
+
+# Ignore VS Code settings
+.vscode/
