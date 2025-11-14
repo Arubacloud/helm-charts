@@ -96,11 +96,6 @@ spec:
                   key: client-url
                   name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
             {{- end }}
-            - name: ARUBA_CLIENT_URL
-              valueFrom:
-                secretKeyRef:
-                  key: client-url
-                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
             - name: ARUBA_CLIENT_ID
               valueFrom:
                 secretKeyRef:
