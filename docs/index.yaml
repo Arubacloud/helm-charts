@@ -1,10 +1,23 @@
 apiVersion: v1
 entries:
+  cluster-autoscaler:
+  - apiVersion: v2
+    appVersion: 1.32.1
+    created: "2025-11-14T14:41:22.535623916Z"
+    description: Scales Kubernetes worker nodes within autoscaling groups.
+    digest: 9f0f00a7eb0f8105bc29078cf3376408259a2b6b5a647e0d46dc9960cb20a3ea
+    home: https://github.com/kubernetes/autoscaler
+    icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
+    name: cluster-autoscaler
+    type: application
+    urls:
+    - https://arubacloud.github.io/helm-charts/cluster-autoscaler-1.0.0.tgz
+    version: 1.0.0
   copilot:
   - apiVersion: v2
-    created: "2025-11-14T13:33:45.362444812Z"
+    created: "2025-11-14T14:41:22.535817117Z"
     description: Example Helm chart for Aruba Cloud
-    digest: 10e3944da54f749c8265b44cd306d2c16437e6627ec346ec21e28f35acdd8d36
+    digest: 5b6a74f866830a0f21c294bbbee4b4c4a580d7c56551df6390452c12cbec2c5e
     maintainers:
     - email: support@arubacloud.com
       name: Aruba Cloud
@@ -12,4 +25,4 @@ entries:
     urls:
     - https://arubacloud.github.io/helm-charts/copilot-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-14T13:33:45.362113235Z"
+generated: "2025-11-14T14:41:22.534460724Z"
