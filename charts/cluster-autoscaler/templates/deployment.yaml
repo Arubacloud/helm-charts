@@ -1,0 +1,209 @@
+#{{- if or ( or .Values.autoDiscovery.clusterName .Values.autoDiscovery.namespace .Values.autoDiscovery.labels ) .Values.autoscalingGroups }}
+#{{/* one of the above is required */}}
+apiVersion: {{ template "deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  annotations:
+{{ toYaml .Values.deployment.annotations | indent 4 }}
+  labels:
+{{ include "cluster-autoscaler.labels" . | indent 4 }}
+  name: {{ template "cluster-autoscaler.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+{{ include "cluster-autoscaler.instance-name" . | indent 6 }}
+    {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 6 }}
+    {{- end }}
+{{- if .Values.updateStrategy }}
+  strategy:
+    {{ toYaml .Values.updateStrategy | nindent 4 | trim }}
+{{- end }}
+  template:
+    metadata:
+    {{- if .Values.podAnnotations }}
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+{{ include "cluster-autoscaler.instance-name" . | indent 8 }}
+      {{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 8 }}
+      {{- end }}
+      {{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.priorityClassName }}
+      priorityClassName: "{{ .Values.priorityClassName }}"
+      {{- end }}
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dnsPolicy }}
+      dnsPolicy: "{{ .Values.dnsPolicy }}"
+      {{- end }}
+      {{- if .Values.hostNetwork }}
+      hostNetwork: {{ .Values.hostNetwork }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ template "cluster-autoscaler.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          command:
+            - ./cluster-autoscaler
+            - --cloud-provider=aruba
+          {{- range $key, $value := .Values.extraArgs }}
+            {{- if not (kindIs "invalid" $value) }}
+            - --{{ $key | mustRegexFind "^[^_]+" }}={{ $value }}
+            {{- else }}
+            - --{{ $key | mustRegexFind "^[^_]+" }}
+            {{- end }}
+          {{- end }}
+          {{- range .Values.customArgs }}
+            - {{ . }}
+          {{- end }}
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+          {{- if and (eq .Values.cloudProvider "aws") (ne (tpl .Values.awsRegion $) "") }}
+
+          {{- else if eq .Values.cloudProvider "aruba" }}
+            - name: ARUBA_CLIENT_URL
+              valueFrom:
+                secretKeyRef:
+                  key: client-url
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            - name: ARUBA_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client-id
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            - name: ARUBA_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client-secret
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            - name: ARUBA_CLUSTER_ID
+              valueFrom:
+                secretKeyRef:
+                  key: cluster-id
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            - name: ARUBA_PROJECT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: project-id
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            - name: ARUBA_REGION
+              valueFrom:
+                secretKeyRef:
+                  key: region
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+          {{- end }}
+          {{- range $key, $value := .Values.extraEnv }}
+            - name: {{ $key }}
+              value: "{{ $value }}"
+          {{- end }}
+          {{- range $key, $value := .Values.extraEnvConfigMaps }}
+            - name: {{ $key }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ default (include "cluster-autoscaler.fullname" $) $value.name }}
+                  key: {{ required "Must specify key!" $value.key }}
+          {{- end }}
+          {{- range $key, $value := .Values.extraEnvSecrets }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (include "cluster-autoscaler.fullname" $) $value.name }}
+                  key: {{ required "Must specify key!" $value.key }}
+          {{- end }}
+          {{- if or .Values.envFromSecret .Values.envFromConfigMap }}
+          envFrom:
+          {{- if .Values.envFromSecret }}
+            - secretRef:
+                name: {{ .Values.envFromSecret }}
+          {{- end }}
+          {{- if .Values.envFromConfigMap }}
+            - configMapRef:
+                name: {{ .Values.envFromConfigMap }}
+          {{- end }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: 8085
+          ports:
+            - containerPort: 8085
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          {{- if .Values.containerSecurityContext }}
+          securityContext:
+            {{ toYaml .Values.containerSecurityContext | nindent 12 | trim }}
+          {{- end }}
+          {{- if or .Values.extraVolumeSecrets .Values.extraVolumeMounts .Values.clusterAPIKubeconfigSecret }}
+          volumeMounts:
+          {{- range $key, $value := .Values.extraVolumeSecrets }}
+            - name: {{ $key }}
+              mountPath: {{ required "Must specify mountPath!" $value.mountPath }}
+              readOnly: true
+          {{- end }}
+          {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+          {{- end }}
+    {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+    {{- end }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      serviceAccountName: {{ template "cluster-autoscaler.serviceAccountName" . }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+    {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+{{ toYaml .Values.topologySpreadConstraints | indent 8 }}
+    {{- end }}
+      {{- if .Values.securityContext }}
+      securityContext:
+        {{ toYaml .Values.securityContext | nindent 8 | trim }}
+      {{- end }}
+      {{- if or .Values.extraVolumeSecrets .Values.extraVolumes .Values.clusterAPIKubeconfigSecret }}
+      volumes:
+      {{- range $key, $value := .Values.extraVolumeSecrets }}
+        - name: {{ $key }}
+          secret:
+            secretName: {{ default (include "cluster-autoscaler.fullname" $) $value.name }}
+            {{- if $value.items }}
+            items:
+            {{- toYaml $value.items | nindent 14 }}
+            {{- end }}
+      {{- end }}
+      {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+    {{- end }}
+#{{- end }}
