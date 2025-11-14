@@ -62,12 +62,6 @@ spec:
           command:
             - ./cluster-autoscaler
             - --cloud-provider=aruba
-            {{- if .Values.tokenEndpointOverride }}
-            - --acloud-token-endpoint={{ .Values.tokenEndpointOverride }}
-            {{- end }}
-            {{- if .Values.endpointOverride }}
-            - --acloud-endpoint={{ .Values.endpointOverride }}
-            {{- end }}
           {{- range $key, $value := .Values.extraArgs }}
             {{- if not (kindIs "invalid" $value) }}
             - --{{ $key | mustRegexFind "^[^_]+" }}={{ $value }}
@@ -87,9 +81,21 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.serviceAccountName
-          {{- if and (eq .Values.cloudProvider "aws") (ne (tpl .Values.awsRegion $) "") }}
-
-          {{- else if eq .Values.cloudProvider "aruba" }}
+          {{- if eq .Values.cloudProvider "aruba" }}
+            {{- if .Values.arubaTokenEndpointOverride }}
+            - name: ARUBA_TOKEN_URL
+              valueFrom:
+                secretKeyRef:
+                  key: token-url
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            {{- end }}
+            {{- if .Values.arubaClientURLOverride }}
+            - name: ARUBA_CLIENT_URL
+              valueFrom:
+                secretKeyRef:
+                  key: client-url
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            {{- end }}
             - name: ARUBA_CLIENT_URL
               valueFrom:
                 secretKeyRef:
