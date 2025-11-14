@@ -1,6 +1,6 @@
-# cluster-autoscaler
+# aruba-cluster-autoscaler
 
-Scales Kubernetes worker nodes within autoscaling groups.
+Scales Aruba Maneged Kubernetes worker nodes within autoscaling enabled per machine pools.
 
 ## TL;DR
 
