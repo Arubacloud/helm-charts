@@ -361,4 +361,4 @@ vpa:
   recommender: default
 
 # secretKeyRefNameOverride -- Overrides the name of the Secret to use when loading the secretKeyRef for AWS, Azure and Civo env variables
-secretKeyRefNameOverride: ""
+secretKeyRefNameOverride: "aruba-api-access"
