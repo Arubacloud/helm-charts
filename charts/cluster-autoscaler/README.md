@@ -18,6 +18,7 @@ $ helm install my-release autoscaler/cluster-autoscaler \
 ## Introduction
 
 This chart bootstraps a cluster-autoscaler deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart has been modified starting from official CA Helm Chart in the https://github.com/kubernetes/autoscaler/cluster-autoscaler/charts directory and customized to work in Aruba Cloud environment.
 
 ## Prerequisites
 
@@ -28,103 +29,18 @@ This chart bootstraps a cluster-autoscaler deployment on a [Kubernetes](http://k
 
 **By default, no deployment is created and nothing will autoscale**.
 
-You must provide some minimal configuration, either to specify instance groups or enable auto-discovery. It is not recommended to do both.
+You must provide some minimal configuration to install aruba-cluster-autoscaler.
 
-Either:
-
-- Set `autoDiscovery.clusterName` and provide additional autodiscovery options if necessary **or**
-- Set static node group configurations for one or more node groups (using `autoscalingGroups` or `autoscalingGroupsnamePrefix`).
-
-To create a valid configuration, follow instructions for Aruba cloud provider:
-
-- [AWS](#aws---using-auto-discovery-of-tagged-instance-groups)
-- [GCE](#gce)
-- [Azure](#azure)
-- [OpenStack Magnum](#openstack-magnum)
-- [Cluster API](#cluster-api)
-
-
-### Templating the autoDiscovery.clusterName
-
-The cluster name can be templated in the `autoDiscovery.clusterName` variable. This is useful when the cluster name is dynamically generated based on other values coming from external systems like Argo CD or Flux. This also allows you to use global Helm values to set the cluster name, e.g., `autoDiscovery.clusterName={{ .Values.global.clusterName }}`, so that you don't need to set it in more than 1 location in the values file.
-
-
-### Azure
+### Aruba
 
 The following parameters are required:
 
-- `cloudProvider=azure`
-- `autoscalingGroups[0].name=your-vmss,autoscalingGroups[0].maxSize=10,autoscalingGroups[0].minSize=1`
-- `azureClientID: "your-service-principal-app-id"`
-- `azureClientSecret: "your-service-principal-client-secret"`
-- `azureSubscriptionID: "your-azure-subscription-id"`
-- `azureTenantID: "your-azure-tenant-id"`
-- `azureResourceGroup: "your-aks-cluster-resource-group-name"`
-- `azureVMType: "vmss"`
-
-### OpenStack Magnum
-
-`cloudProvider: magnum` must be set, and then one of
-
-- `magnumClusterName=<cluster name or ID>` and `autoscalingGroups` with the names of node groups and min/max node counts
-- or `autoDiscovery.clusterName=<cluster name or ID>` with one or more `autoDiscovery.roles`.
-
-Additionally, `cloudConfigPath: "/etc/kubernetes/cloud-config"` must be set as this should be the location of the cloud-config file on the host.
-
-Example values files can be found [here](../../cluster-autoscaler/cloudprovider/magnum/examples).
-
-Install the chart with
-
-```console
-$ helm install my-release autoscaler/cluster-autoscaler -f myvalues.yaml
-```
-
-### Cluster-API
-
-`cloudProvider: clusterapi` must be set, and then one or more of
-
-- `autoDiscovery.clusterName`
-- or `autoDiscovery.namespace`
-- or `autoDiscovery.labels`
-
-See [here](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/README.md#configuring-node-group-auto-discovery) for more details.
-
-Additional config parameters available, see the `values.yaml` for more details
-
-- `clusterAPIMode`
-- `clusterAPIKubeconfigSecret`
-- `clusterAPIWorkloadKubeconfigPath`
-- `clusterAPICloudConfigPath`
-
-
-### Hetzner Cloud
-
-The following parameters are required:
-
-- `cloudProvider=hetzner`
-- `extraEnv.HCLOUD_TOKEN=...`
-- `autoscalingGroups=...`
-
-Each autoscaling group requires an additional `instanceType` and `region` key to be set.
-
-Read [cluster-autoscaler/cloudprovider/hetzner/README.md](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/hetzner/README.md) for further information on the setup without helm.
-
-### Civo
-
-The following parameters are required:
-
-- `cloudProvider=civo`
-- `autoscalingGroups=...`
-
-When installing the helm chart to the namespace `kube-system`, you can set `secretKeyRefNameOverride` to `civo-api-access`.
-Otherwise specify the following parameters:
-
-- `civoApiUrl=https://api.civo.com`
-- `civoApiKey=...`
-- `civoClusterID=...`
-- `civoRegion=...`
-
-Read [cluster-autoscaler/cloudprovider/civo/README.md](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/civo/README.md) for further information on the setup without helm.
+- `cloudProvider=aruba`
+- `arubaClientID: "your-client-id"`
+- `arubaClientSecret: "your-client-secret"`
+- `arubaProjectID: "your-aruba-project-id"`
+- `arubaClusterID: "your-aruba-managed-k8s-id"`
+- `arubaRegion: "the-region-where-your-aruba-managed-k8s-is-deployed"`
 
 ## Uninstalling the Chart
 
@@ -140,8 +56,6 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Additional Configuration
 
-### AWS - IAM
-
 ### Custom arguments
 
 You can use the `customArgs` value to give any argument to cluster autoscaler command.
@@ -152,7 +66,7 @@ This is helpful when you need to inject values from configmap or secret.
 
 ## Troubleshooting
 
-The chart will succeed even if the container arguments are incorrect. A few minutes after starting `kubectl logs -l "app=aws-cluster-autoscaler" --tail=50` should loop through something like
+The chart will succeed even if the container arguments are incorrect. A few minutes after starting `kubectl logs -l "app=aruba-cluster-autoscaler" --tail=50` should loop through something like
 
 ```
 polling_autoscaler.go:111] Poll finished
@@ -167,13 +81,11 @@ If not, find a pod that the deployment created and `describe` it, paying close a
 Containers:
   cluster-autoscaler:
     Command:
-      ./cluster-autoscaler
-      --cloud-provider=aws
-# if specifying ASGs manually
-      --nodes=1:10:your-scaling-group-name
-# if using autodiscovery
-      --node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/<ClusterName>
-      --v=4
+      - ./cluster-autoscaler
+      - --cloud-provider=aruba
+      - --logtostderr=true
+      - --stderrthreshold=info
+      - --v=4
 ```
 
 ### PodSecurityPolicy
@@ -182,7 +94,7 @@ Though enough for the majority of installations, the default PodSecurityPolicy _
 
 ### VerticalPodAutoscaler
 
-The CA Helm Chart can install a [`VerticalPodAutoscaler`](https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/README.md) object from Chart version `9.27.0`
+The present chert can install a [`VerticalPodAutoscaler`](https://github.com/kubernetes/autoscaler/blob/master/vertical-pod-autoscaler/README.md) object from Chart version `1.0.0`
 onwards for the Cluster Autoscaler Deployment to scale the CA as appropriate, but for that, we
 need to install the VPA to the cluster separately. A VPA can help minimize wasted resources
 when usage spikes periodically or remediate containers that are being OOMKilled.
