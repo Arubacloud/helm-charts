@@ -1,5 +1,3 @@
-#{{- if or ( or .Values.autoDiscovery.clusterName .Values.autoDiscovery.namespace .Values.autoDiscovery.labels ) .Values.autoscalingGroups }}
-#{{/* one of the above is required */}}
 apiVersion: {{ template "deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -206,4 +204,3 @@ spec:
         - name: {{ . }}
       {{- end }}
     {{- end }}
-#{{- end }}
