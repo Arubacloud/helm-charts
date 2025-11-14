@@ -1,9 +1,0 @@
-# Default values for copilot chart
-replicaCount: 1
-image:
-  repository: nginx
-  tag: stable
-  pullPolicy: IfNotPresent
-service:
-  type: ClusterIP
-  port: 80
