@@ -7,7 +7,7 @@ additionalLabels: {}
 
 # arubaClientURL -- URL for the Aruba API.
 # Required if `cloudProvider=aruba`
-arubaClientUrl: "https://api.aruba.com"
+arubaClientURL: "https://api.aruba.com"
 
 # arubaClientID -- Client ID for the aruba API.
 # Required if `cloudProvider=aruba`
