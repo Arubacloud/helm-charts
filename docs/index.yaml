@@ -2,9 +2,9 @@ apiVersion: v1
 entries:
   copilot:
   - apiVersion: v2
-    created: "2025-11-14T11:54:28.767337265Z"
+    created: "2025-11-14T13:33:45.362444812Z"
     description: Example Helm chart for Aruba Cloud
-    digest: 72d89785edbce1992555e869a01c6d5a90d1e13fdac1a09864036258bd6cd754
+    digest: 10e3944da54f749c8265b44cd306d2c16437e6627ec346ec21e28f35acdd8d36
     maintainers:
     - email: support@arubacloud.com
       name: Aruba Cloud
@@ -12,4 +12,4 @@ entries:
     urls:
     - https://arubacloud.github.io/helm-charts/copilot-0.1.0.tgz
     version: 0.1.0
-generated: "2025-11-14T11:54:28.766922222Z"
+generated: "2025-11-14T13:33:45.362113235Z"
