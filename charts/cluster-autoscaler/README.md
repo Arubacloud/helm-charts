@@ -117,7 +117,7 @@ vpa:
 | additionalLabels | object | `{}` | Labels to add to each object of the chart. |
 | affinity | object | `{}` | Affinity for pod assignment |
 | arubaClientSecret | string | `""` | API key for the Aruba API. Required if `cloudProvider=aruba` |
-| arubaClientUrl | string | `"https://api.aruba.com"` | URL for the Aruba API. Required if `cloudProvider=aruba` |
+| arubaClientURL | string | `"https://api.aruba.com"` | URL for the Aruba API. Required if `cloudProvider=aruba` |
 | arubaClusterID | string | `""` | Cluster ID for the Aruba cluster. Required if `cloudProvider=aruba` |
 | arubaRegion | string | `""` | Region for the Aruba cluster. Required if `cloudProvider=aruba` |
 | cloudConfigPath | string | `""` | Configuration file for cloud provider. |
