@@ -1,6 +1,5 @@
 # Aruba Cloud Helm Repository
 
-# Aruba Cloud Helm Charts Repository
 
 This repository hosts multiple Helm charts for Aruba Cloud, published via GitHub Pages.
 
