@@ -5,6 +5,14 @@ affinity: {}
 # additionalLabels -- Labels to add to each object of the chart.
 additionalLabels: {}
 
+# -- Override the authentication endpoint
+# Required if `cloudProvider=aruba`
+arubaTokenEndpointOverride: ""
+
+# -- Override the CMP Rest API endpoint
+# Required if `cloudProvider=aruba`
+arubaClientURLOverride: ""
+
 # arubaClientURL -- URL for the Aruba API.
 # Required if `cloudProvider=aruba`
 arubaClientURL: "https://api.aruba.com"
