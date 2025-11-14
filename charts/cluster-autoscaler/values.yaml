@@ -171,6 +171,13 @@ fullnameOverride: ""
 # hostNetwork -- Whether to expose network interfaces of the host machine to pods.
 hostNetwork: false
 
+hostAliases: []
+# e.g:
+# hostAliases:
+#   - ip: "10.150.128.134"
+#     hostnames:
+#       - "mylogin.devops.aruba.it"
+
 image:
   # image.repository -- Image repository
   repository: nexusrepo.aruba.it:10003/ingegneria-cmp-operators-autoscaler
