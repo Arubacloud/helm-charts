@@ -62,6 +62,12 @@ spec:
           command:
             - ./cluster-autoscaler
             - --cloud-provider=aruba
+            {{- if .Values.tokenEndpointOverride }}
+            - --acloud-token-endpoint={{ .Values.tokenEndpointOverride }}
+            {{- end }}
+            {{- if .Values.endpointOverride }}
+            - --acloud-endpoint={{ .Values.endpointOverride }}
+            {{- end }}
           {{- range $key, $value := .Values.extraArgs }}
             {{- if not (kindIs "invalid" $value) }}
             - --{{ $key | mustRegexFind "^[^_]+" }}={{ $value }}
