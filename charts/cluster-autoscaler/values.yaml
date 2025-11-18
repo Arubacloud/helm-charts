@@ -7,11 +7,15 @@ additionalLabels: {}
 
 # -- Override the authentication endpoint
 # Required if `cloudProvider=aruba`
-arubaTokenEndpointOverride: ""
+arubaKeycloakEndpointOverride: ""
+
+# -- Override the authentication endpoint
+# Required if `cloudProvider=aruba`
+arubaRealmOverride: ""
 
 # -- Override the CMP Rest API endpoint
 # Required if `cloudProvider=aruba`
-arubaClientURLOverride: "https://api.aruba.com"
+arubaClientURLOverride: ""
 
 # arubaClientURL -- URL for the Aruba API.
 # Required if `cloudProvider=aruba`
@@ -376,4 +380,4 @@ vpa:
   recommender: default
 
 # secretKeyRefNameOverride -- Overrides the name of the Secret to use when loading the secretKeyRef for AWS, Azure and Civo env variables
-secretKeyRefNameOverride: "aruba-api-access"
+secretKeyRefNameOverride: ""
