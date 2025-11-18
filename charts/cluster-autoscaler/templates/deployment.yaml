@@ -82,11 +82,18 @@ spec:
                 fieldRef:
                   fieldPath: spec.serviceAccountName
           {{- if eq .Values.cloudProvider "aruba" }}
-            {{- if .Values.arubaTokenEndpointOverride }}
-            - name: ARUBA_TOKEN_URL
+            {{- if .Values.arubaRealmOverride }}
+            - name: ARUBA_REALM
               valueFrom:
                 secretKeyRef:
-                  key: token-url
+                  key: realm
+                  name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
+            {{- end }}
+            {{- if .Values.arubaKeycloakEndpointOverride }}
+            - name: ARUBA_KEYCLOAK_URL
+              valueFrom:
+                secretKeyRef:
+                  key: keycloak-url
                   name: {{ default (include "cluster-autoscaler.fullname" .) .Values.secretKeyRefNameOverride }}
             {{- end }}
             {{- if .Values.arubaClientURLOverride }}
