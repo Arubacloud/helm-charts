@@ -3,22 +3,26 @@ kind: ServiceAccount
 metadata:
   name: certmanager-hook-sa
   namespace: cert-manager
----
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: certmanager-hook-role
   namespace: cert-manager
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
 rules:
   - apiGroups: ['']
     resources: ['services']
     verbs: ['get']
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: certmanager-hook-rolebinding
   namespace: cert-manager
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
 subjects:
   - kind: ServiceAccount
     name: certmanager-hook-sa
