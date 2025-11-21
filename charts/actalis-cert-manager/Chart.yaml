@@ -1,0 +1,10 @@
+apiVersion: v2
+name: actalis-cert-manager
+description: Installs cert-manager, Actalis EAB secret, and ClusterIssuer for Actalis ACME
+version: 0.1.0
+type: application
+dependencies:
+  - name: cert-manager
+    version: 1.15.3
+    repository: https://charts.jetstack.io
+    alias: certmanager
