@@ -1,7 +1,9 @@
+{{- if .Values.actalis.issuer.enabled }}
 apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+kind: Issuer
 metadata:
   name: actalis-acme
+  namespace: {{ .Release.Namespace }}
 spec:
   acme:
     email: {{ .Values.actalis.email | quote }}
@@ -17,3 +19,4 @@ spec:
       - http01:
           ingress:
             class: {{ .Values.actalis.ingressClass | quote }}
+{{- end }}

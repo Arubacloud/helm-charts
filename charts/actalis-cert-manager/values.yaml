@@ -1,10 +1,12 @@
-certmanager:
-  crds:
-    enabled: true
 
 actalis:
-  hmac: "CHANGE_ME_HMAC_KEY"
+  hmacKey: "CHANGE_ME_HMAC_KEY"
   kid: "CHANGE_ME_KID"
   email: "change-me@example.com"
   server: "https://acme-api.actalis.com/acme/directory"
   ingressClass: "nginx"
+  clusterIssuer:
+    enabled: true
+  issuers:
+    enabled: false
+    list: [] # Example: [{ name: "actalis-acme", namespace: "default" }, { name: "actalis-acme", namespace: "other-ns" }]
