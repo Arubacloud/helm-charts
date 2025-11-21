@@ -2,7 +2,7 @@ apiVersion: v1
 entries:
   actalis-cert-manager:
   - apiVersion: v2
-    created: "2025-11-21T15:44:56.081288595Z"
+    created: "2025-11-21T16:06:37.609309451Z"
     dependencies:
     - alias: certmanager
       name: cert-manager
@@ -10,7 +10,7 @@ entries:
       version: 1.15.3
     description: Installs cert-manager, Actalis EAB secret, and ClusterIssuer for
       Actalis ACME
-    digest: 6255fa166fc4ffd4caa66bc94104f79619efaa15bac71249f6be6adcc84d926e
+    digest: c7c86e38b74c3bdb9ffed9e737a604b72a6eae4c855e9405d767c461daea9ca4
     name: actalis-cert-manager
     type: application
     urls:
@@ -19,9 +19,9 @@ entries:
   cluster-autoscaler:
   - apiVersion: v2
     appVersion: 1.32.1
-    created: "2025-11-21T15:44:56.082333391Z"
+    created: "2025-11-21T16:06:37.610264688Z"
     description: Scales Kubernetes worker nodes within autoscaling groups.
-    digest: 8afd4e4cfc1e3d1bd895dacbabf588071b19e0bb097ded28a8534bc7cf3a500d
+    digest: 6d52276ce31a257a55dc563c8651c8b0326588f35412d28943344aba80b9399b
     home: https://github.com/Arubacloud/helm-charts/
     icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
     name: cluster-autoscaler
@@ -29,4 +29,4 @@ entries:
     urls:
     - https://arubacloud.github.io/helm-charts/cluster-autoscaler-1.0.0.tgz
     version: 1.0.0
-generated: "2025-11-21T15:44:56.069350751Z"
+generated: "2025-11-21T16:06:37.601819508Z"
