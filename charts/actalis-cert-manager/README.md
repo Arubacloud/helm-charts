@@ -1,4 +1,4 @@
-# actalis-cert-manager Helm Chart
+# actalis-cert-manager
 
 A Helm chart to install cert-manager, configure Actalis ACME integration, and bootstrap secure certificate management for Kubernetes clusters.
 
