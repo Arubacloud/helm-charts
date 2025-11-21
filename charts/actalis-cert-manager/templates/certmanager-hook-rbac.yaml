@@ -3,17 +3,13 @@ kind: ServiceAccount
 metadata:
   name: certmanager-hook-sa
   namespace: cert-manager
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-10"
+  # No Helm hook annotations; standard chart resource
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: certmanager-hook-role
   namespace: cert-manager
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-10"
+  # No Helm hook annotations; standard chart resource
 rules:
   - apiGroups: ['']
     resources: ['services']
@@ -23,9 +19,7 @@ kind: RoleBinding
 metadata:
   name: certmanager-hook-rolebinding
   namespace: cert-manager
-  annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-10"
+  # No Helm hook annotations; standard chart resource
 subjects:
   - kind: ServiceAccount
     name: certmanager-hook-sa
