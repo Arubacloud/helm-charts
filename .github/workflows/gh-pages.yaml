@@ -47,6 +47,12 @@ jobs:
             helm-docs --chart-search-root "$dir"
           done
 
+      - name: Update chart dependencies
+        run: |
+          for dir in charts/*/; do
+            helm dependency update "$dir"
+          done
+
       - name: Package all charts
         run: |
           mkdir -p packaged

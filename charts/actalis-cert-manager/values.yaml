@@ -1,0 +1,10 @@
+certmanager:
+  crds:
+    enabled: true
+
+actalis:
+  hmac: "CHANGE_ME_HMAC_KEY"
+  kid: "CHANGE_ME_KID"
+  email: "change-me@example.com"
+  server: "https://acme-api.actalis.com/acme/directory"
+  ingressClass: "nginx"

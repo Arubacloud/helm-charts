@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: actalis-acme
+spec:
+  acme:
+    email: {{ .Values.actalis.email | quote }}
+    server: {{ .Values.actalis.server | quote }}
+    privateKeySecretRef:
+      name: actalis-acme-account-key
+    externalAccountBinding:
+      keyID: {{ .Values.actalis.kid | quote }}
+      keySecretRef:
+        name: actalis-eab-secret
+        key: secret
+    solvers:
+      - http01:
+          ingress:
+            class: {{ .Values.actalis.ingressClass | quote }}
