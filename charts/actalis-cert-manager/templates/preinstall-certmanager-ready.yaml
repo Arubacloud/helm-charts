@@ -1,3 +1,42 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: certmanager-hook-sa
+  namespace: cert-manager
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-10"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: certmanager-hook-role
+  namespace: cert-manager
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-10"
+rules:
+  - apiGroups: ['']
+    resources: ['services']
+    verbs: ['get']
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: certmanager-hook-rolebinding
+  namespace: cert-manager
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-10"
+subjects:
+  - kind: ServiceAccount
+    name: certmanager-hook-sa
+    namespace: cert-manager
+roleRef:
+  kind: Role
+  name: certmanager-hook-role
+  apiGroup: rbac.authorization.k8s.io
 apiVersion: batch/v1
 kind: Job
 metadata:
