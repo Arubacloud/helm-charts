@@ -1,22 +1,25 @@
-{{- if .Values.actalis.issuer.enabled }}
+{{- if .Values.actalis.issuers.enabled }}
+{{- range .Values.actalis.issuers.list }}
+---
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: actalis-acme
-  namespace: {{ .Release.Namespace }}
+  name: {{ .name }}
+  namespace: {{ .namespace }}
 spec:
   acme:
-    email: {{ .Values.actalis.email | quote }}
-    server: {{ .Values.actalis.server | quote }}
+    email: {{ $.Values.actalis.email | quote }}
+    server: {{ $.Values.actalis.server | quote }}
     privateKeySecretRef:
       name: actalis-acme-account-key
     externalAccountBinding:
-      keyID: {{ .Values.actalis.kid | quote }}
+      keyID: {{ $.Values.actalis.kid | quote }}
       keySecretRef:
         name: actalis-eab-secret
         key: secret # contains Actalis hmacKey
     solvers:
       - http01:
           ingress:
-            class: {{ .Values.actalis.ingressClass | quote }}
+            class: {{ $.Values.actalis.ingressClass | quote }}
+{{- end }}
 {{- end }}
