@@ -15,9 +15,12 @@ A Helm chart to install cert-manager, configure Actalis ACME integration, and bo
 
 ## Actalis ACME Setup
 1. [Create an Actalis account](https://www.actalis.com/).
+
 2. Activate ACME support in your Actalis dashboard (see [Actalis ACME activation guideline](https://guide.actalis.com/ssl/activation/acme)):
+
   ![Activate ACME](assets/acme-activation.png)
 3. Retrieve your ACME credentials (Key ID and HMAC Key):
+
   ![Get ACME Credentials](assets/acme-credentials.png)
 
 ## Installation
