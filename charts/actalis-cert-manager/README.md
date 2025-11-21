@@ -24,6 +24,7 @@ A Helm chart to install cert-manager, configure Actalis ACME integration, and bo
   ![Get ACME Credentials](assets/acme-credentials.png)
 
 ## Installation
+This chart includes a pre-install hook that waits for the cert-manager webhook service to be ready before applying resources. This helps prevent installation errors due to cert-manager not being fully initialized.
 
 
 ## Install cert-manager CRDs
