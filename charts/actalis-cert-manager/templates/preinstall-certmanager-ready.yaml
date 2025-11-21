@@ -9,6 +9,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: certmanager-hook-sa
       containers:
         - name: check-certmanager-ready
           image: bitnami/kubectl:latest
