@@ -5,14 +5,15 @@ Scales Aruba Maneged Kubernetes worker nodes within autoscaling enabled per mach
 ## TL;DR
 
 ```console
-$ helm repo add aruba https://github.com/Arubacloud/helm-charts
+$ helm repo add arubacloud https://arubacloud.github.io/helm-charts/
+$ helm repo update
 
-$ helm install my-release autoscaler/cluster-autoscaler \
-    --set 'arubaClientID'=<ClientID>
-    --set 'arubaClientSecret'=<ClientSecret>
-    --set 'arubaProjectID'=<ProjectID>
-    --set 'arubaRegion'=<ClientID>
-    --set 'image.tag'=<k8s-version>
+$ helm install my-release autoscaler/cluster-autoscaler -n kube-system \
+    --set 'arubaClientID'=<ClientID> \
+    --set 'arubaClientSecret'=<ClientSecret> \
+    --set 'arubaProjectID'=<ProjectID> \
+    --set 'arubaRegion'=<ClientID> \
+    --set 'image.tag'=<k8s-version> 
 ```
 
 ## Introduction
