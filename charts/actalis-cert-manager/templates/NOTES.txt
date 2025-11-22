@@ -1,0 +1,89 @@
+############################################################
+#                                                          #
+#   █████╗ ██████╗ ██╗   ██╗██████╗  █████╗                #
+#  ██╔══██╗██╔══██╗██║   ██║██╔══██╗██╔══██╗               #
+#  ███████║██████╔╝██║   ██║██████╔╝███████║               #
+#  ██╔══██║██╔══██╗██║   ██║██╔══██╗██╔══██║               #
+#  ██║  ██║██║  ██║╚██████╔╝██████╔╝██║  ██║               #
+#  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝               #
+#                                                          #
+#   actalis-cert-manager Helm Chart Installed!              #
+#                                                          #
+############################################################
+
+{{- /*
+NOTES.txt for actalis-cert-manager
+*/ -}}
+
+Thank you for installing the actalis-cert-manager Helm chart!
+
+Usage Example:
+
+After installation, you can request certificates using the Actalis ClusterIssuer or Issuer created by this chart.
+
+Example Certificate resource:
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: my-cert
+  namespace: default
+spec:
+  secretName: my-cert-tls
+  issuerRef:
+    name: actalis-acme
+    kind: ClusterIssuer
+  commonName: example.com
+  dnsNames:
+    - example.com
+---
+
+Or, for namespace-scoped Issuer (if enabled in values):
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: my-cert
+  namespace: default
+spec:
+  secretName: my-cert-tls
+  issuerRef:
+    name: actalis-acme
+    kind: Issuer
+  commonName: example.com
+  dnsNames:
+    - example.com
+---
+
+You can also use the following annotation in your Ingress resource for automatic certificate management:
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: actalis-acme
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - example.com
+      secretName: example-com-tls
+  rules:
+    - host: example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-service
+                port:
+                  number: 80
+---
+
+For more details, see the README and cert-manager documentation.
