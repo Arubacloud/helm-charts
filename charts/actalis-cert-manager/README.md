@@ -57,7 +57,7 @@ helm repo update
 Create a values file like **test-values.yaml**
 ```yaml
 actalis:
-  hmacKey: "_6lYptvZdi2ZWybRDO8_rfAmxIQSRBvrAszIcTIwdtE"
+  hmacKey: "_6lYptvZdi2ZWybRDO8_rfAmxIQSRBvrAszIcTIwdtE" # base64url-encoded, unpadded (no trailing '=')
   kid: "qbjLGStU9KfgZNBBwPtWLKiZkn"
   email: "your-email@example.com"
   server: "https://acme-api.actalis.com/acme/directory"
@@ -213,7 +213,6 @@ With this annotation, cert-manager will automatically create the required Certif
 
 ## Uninstall
 
-kubectl delete namespace cert-manager
 
 To uninstall actalis-cert-manager:
 ```sh
