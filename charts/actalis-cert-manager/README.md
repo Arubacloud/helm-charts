@@ -24,19 +24,25 @@ A Helm chart to install cert-manager, configure Actalis ACME integration, and bo
   ![Get ACME Credentials](assets/acme-credentials.png)
 
 ## Installation
-This chart includes a pre-install hook that waits for the cert-manager webhook service to be ready before applying resources. This helps prevent installation errors due to cert-manager not being fully initialized.
 
+### Prerequisites
 
-## Install cert-manager CRDs
-Before installing this chart, you must manually install cert-manager CRDs:
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.crds.yaml
+**Important:** You must install cert-manager and its CRDs before installing this chart. The chart will not work unless cert-manager is present and ready in your cluster.
+
+Recommended: Install cert-manager and its CRDs in one step (wait for all pods to be ready):
+```sh
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --set installCRDs=true --wait
 ```
 
+Verify cert-manager is running:
+```sh
+kubectl get pods -n cert-manager
+kubectl get svc -n cert-manager
+```
 
-## Install the chart
-
-**Important:** The actalis-cert-manager chart does NOT install cert-manager CRDs. You must install cert-manager CRDs manually before installing this chart. The chart will install cert-manager as a dependency, but CRDs must be managed outside Helm.
+### Install the chart
 
 Add the arubacloud Helm repository:
 ```bash
@@ -44,24 +50,7 @@ helm repo add arubacloud https://arubacloud.github.io/helm-charts/
 helm repo update
 ```
 
-Install the chart from the arubacloud repo:
-```bash
-helm install actalis-cert-manager arubacloud/actalis-cert-manager --namespace cert-manager --create-namespace
-```
-
-## Parameters
-| Name                | Description                                      | Default                        |
-|---------------------|--------------------------------------------------|--------------------------------|
-| `actalis.hmacKey`   | Actalis EAB HMAC key (base64url, unpadded)       | `CHANGE_ME_HMAC_KEY`           |
-| `actalis.kid`       | Actalis EAB Key ID                               | `CHANGE_ME_KID`                |
-| `actalis.email`     | Email for ACME registration                      | `change-me@example.com`        |
-| `actalis.server`    | Actalis ACME server URL                          | `https://acme-api.actalis.com/acme/directory` |
-| `actalis.ingressClass` | Ingress class for HTTP01 challenge             | `nginx`                        |
-| `actalis.clusterIssuer.enabled` | Enable ClusterIssuer creation (cluster-wide) | `true` |
-| `actalis.issuers.enabled` | Enable Issuer creation (namespace-scoped, supports multiple) | `false` |
-| `actalis.issuers.list` | List of Issuer objects to create (name, namespace) | `[]` |
-
-## Example values.yaml
+Create a values file like **test-values.yaml**
 ```yaml
 actalis:
   hmacKey: "_6lYptvZdi2ZWybRDO8_rfAmxIQSRBvrAszIcTIwdtE"
@@ -79,6 +68,24 @@ actalis:
       - name: actalis-acme
         namespace: other-ns
 ```
+
+
+Then install this chart:
+```sh
+helm install actalis-cert-manager arubacloud/actalis-cert-manager --namespace cert-manager --create-namespace -f test-values.yaml --wait
+```
+
+## Parameters
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `actalis.hmacKey`   | Actalis EAB HMAC key (base64url, unpadded)       | `CHANGE_ME_HMAC_KEY`           |
+| `actalis.kid`       | Actalis EAB Key ID                               | `CHANGE_ME_KID`                |
+| `actalis.email`     | Email for ACME registration                      | `change-me@example.com`        |
+| `actalis.server`    | Actalis ACME server URL                          | `https://acme-api.actalis.com/acme/directory` |
+| `actalis.ingressClass` | Ingress class for HTTP01 challenge             | `nginx`                        |
+| `actalis.clusterIssuer.enabled` | Enable ClusterIssuer creation (cluster-wide) | `true` |
+| `actalis.issuers.enabled` | Enable Issuer creation (namespace-scoped, supports multiple) | `false` |
+| `actalis.issuers.list` | List of Issuer objects to create (name, namespace) | `[]` |
 
 ## Usage Example
 
@@ -158,15 +165,21 @@ With this annotation, cert-manager will automatically create the required Certif
 
 ## Uninstall
 
-To uninstall the chart and all resources created by it:
-```bash
-helm uninstall my-release --namespace cert-manager
+kubectl delete namespace cert-manager
+
+To uninstall actalis-cert-manager:
+```sh
+helm uninstall actalis-cert-manager --namespace cert-manager
+```
+
+To uninstall cert-manager:
+```sh
+helm uninstall cert-manager --namespace cert-manager
 ```
 
 To remove cert-manager CRDs and namespace (optional, for a full cleanup):
-```bash
+```sh
 kubectl delete crd certificaterequests.cert-manager.io certificates.cert-manager.io challenges.acme.cert-manager.io clusterissuers.cert-manager.io issuers.cert-manager.io orders.acme.cert-manager.io
-
 kubectl delete namespace cert-manager
 ```
 
