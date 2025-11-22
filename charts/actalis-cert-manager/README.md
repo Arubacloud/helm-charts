@@ -29,12 +29,16 @@ A Helm chart to install cert-manager, configure Actalis ACME integration, and bo
 
 **Important:** You must install cert-manager and its CRDs before installing this chart. The chart will not work unless cert-manager is present and ready in your cluster.
 
+
 Recommended: Install cert-manager and its CRDs in one step (wait for all pods to be ready):
 ```sh
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
-helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --set installCRDs=true --wait
+helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --set crds.enabled=true --wait
 ```
+
+⚠️  WARNING: `installCRDs` is deprecated, use `crds.enabled` instead.
+⚠️  WARNING: The default private key rotation policy for Certificate resources is `Always` in cert-manager >= v1.18.0. See [release notes](https://cert-manager.io/docs/releases/release-notes/release-notes-1.18).
 
 Verify cert-manager is running:
 ```sh
@@ -61,12 +65,7 @@ actalis:
   clusterIssuer:
     enabled: true
   issuers:
-    enabled: true
-    list:
-      - name: actalis-acme
-        namespace: default
-      - name: actalis-acme
-        namespace: other-ns
+    enabled: false
 ```
 
 
@@ -124,7 +123,57 @@ spec:
 ### Automatic Certificate Creation via Ingress Annotation
 You can have cert-manager automatically create and manage certificates for your Ingress resources by adding the following annotation:
 
+**Domain and DNS Setup:**
+To successfully issue certificates for `hello.devsecops2025-arubacloud.com`, you must own and manage the domain `devsecops2025-arubacloud.com`. Ensure you create a DNS A or CNAME record for `hello.devsecops2025-arubacloud.com` that points to the external IP address (or hostname) of your nginx ingress controller deployed in the Kubernetes cluster. This allows ACME HTTP01 challenge requests to reach your ingress controller and be validated by Actalis.
+
+For example, if your ingress controller has an external IP of `203.0.113.10`, create a DNS record:
+
+```
+hello.devsecops2025-arubacloud.com. IN A 203.0.113.10
+```
+
+Or, if using a cloud load balancer, point the DNS record to the load balancer's hostname.
+
+Once DNS is configured, cert-manager will automatically create the required Certificate resource and manage the TLS secret for your Ingress.
+
+
 ```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-world
+  template:
+    metadata:
+      labels:
+        app: hello-world
+    spec:
+      containers:
+        - name: hello-world
+          image: hashicorp/http-echo:0.2.3
+          args:
+            - "-text=Hello, World!"
+          ports:
+            - containerPort: 5678
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  namespace: default
+spec:
+  selector:
+    app: hello-world
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5678
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -132,24 +181,23 @@ metadata:
   namespace: default
   annotations:
     cert-manager.io/cluster-issuer: actalis-acme
-    acme.cert-manager.io/http01-edit-in-place: "true"
 spec:
   ingressClassName: nginx
   tls:
-  - hosts:
-    - hello.devsecops2025-arubacloud.com
-    secretName: hello.devsecops2025-arubacloud-com-tls
+    - hosts:
+        - hello.devsecops2025-arubacloud.com
+      secretName: hello-devsecops2025-arubacloud-com-tls
   rules:
-  - host: hello.devsecops2025-arubacloud.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: hello-world
-            port:
-              number: 80
+    - host: hello.devsecops2025-arubacloud.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-world
+                port:
+                  number: 80
 ```
 
 With this annotation, cert-manager will automatically create the required Certificate resource and manage the TLS secret for your Ingress.
