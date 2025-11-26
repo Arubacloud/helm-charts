@@ -192,9 +192,11 @@ hostAliases: []
 
 image:
   # image.repository -- Image repository
-  repository: nexusrepo.aruba.it:10003/ingegneria-cmp-operators-autoscaler
+  repository: registry01-dc07.foundation.intra.cloud.it
+  # For DEV/TEST
+  # repository: nexusrepo.aruba.it:10003/ingegneria-cmp-operators-autoscaler
   # image.tag -- Image tag
-  tag: 0.0.11-unstable
+  tag: v1.33.2
   # image.pullPolicy -- Image pull policy
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.

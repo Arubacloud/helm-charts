@@ -12,8 +12,20 @@ $ helm install my-release autoscaler/cluster-autoscaler -n kube-system \
     --set 'arubaClientID'=<ClientID> \
     --set 'arubaClientSecret'=<ClientSecret> \
     --set 'arubaProjectID'=<ProjectID> \
-    --set 'arubaRegion'=<ClientID> \
+    --set 'arubaClusterID'=<KaaSID> \
+    --set 'arubaRegion'=<RegionName> \
     --set 'image.tag'=<k8s-version> 
+```
+
+### Example
+```console
+$ helm install my-release autoscaler/cluster-autoscaler -n kube-system \
+    --set 'arubaClientID'="cmp-67313cc6-8c05-4723-b839-b6edd496cc3b" \
+    --set 'arubaClientSecret'="***" \
+    --set 'arubaProjectID'='6703d41ba24cc0d3a62819b3' \
+    --set 'arubaClusterID'='69203b17e96133e04331455e' \
+    --set 'arubaRegion'='ITBG-Bergamo' \
+    --set 'image.tag'=v1.30.2 
 ```
 
 ## Introduction
