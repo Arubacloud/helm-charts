@@ -192,7 +192,7 @@ hostAliases: []
 
 image:
   # image.repository -- Image repository
-  repository: registry01-dc07.foundation.intra.cloud.it
+  repository: registry01-dc07.foundation.intra.cloud.it/aruba-autoscaler
   # For DEV/TEST
   # repository: nexusrepo.aruba.it:10003/ingegneria-cmp-operators-autoscaler
   # image.tag -- Image tag
