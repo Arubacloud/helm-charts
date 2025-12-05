@@ -25,7 +25,7 @@ controllerManager:
       configMapName: aruba-controller-manager
       secretName: aruba-controller-manager
     image:
-      repository: controller
+      repository: ghcr.io/arubacloud/arubacloud-resource-operator
       tag: latest
     resources:
       limits:
