@@ -1,0 +1,128 @@
+############################################################
+#                                                          #
+#   █████╗ ██████╗ ██╗   ██╗██████╗  █████╗               #
+#  ██╔══██╗██╔══██╗██║   ██║██╔══██╗██╔══██╗              #
+#  ███████║██████╔╝██║   ██║██████╔╝███████║              #
+#  ██╔══██║██╔══██╗██║   ██║██╔══██╗██╔══██║              #
+#  ██║  ██║██║  ██║╚██████╔╝██████╔╝██║  ██║              #
+#  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝              #
+#                                                          #
+#   Arubacloud Resource Operator Installed!               #
+#                                                          #
+############################################################
+
+{{- /*
+NOTES.txt for arubacloud-resource-operator
+*/ -}}
+
+Thank you for installing the Arubacloud Resource Operator!
+
+Usage Example:
+
+After installation, you can create Aruba Cloud resources using Kubernetes custom resources.
+
+Example VPC resource:
+
+---
+apiVersion: arubacloud.com/v1alpha1
+kind: Vpc
+metadata:
+  name: my-vpc
+  namespace: default
+spec:
+  tenant: my-tenant
+  tags:
+    - production
+    - network
+  location:
+    value: ITBG-Bergamo
+  projectReference:
+    name: my-project
+    namespace: default
+---
+
+Example CloudServer resource:
+
+---
+apiVersion: arubacloud.com/v1alpha1
+kind: CloudServer
+metadata:
+  name: web-server
+  namespace: default
+spec:
+  tenant: my-tenant
+  tags:
+    - webserver
+  location:
+    value: ITBG-Bergamo
+  dataCenter: ITBG-1
+  flavorName: CSO4A8
+  vpcReference:
+    name: my-vpc
+    namespace: default
+  subnetReferences:
+    - name: my-subnet
+      namespace: default
+  keyPairReference:
+    name: my-keypair
+    namespace: default
+  projectReference:
+    name: my-project
+    namespace: default
+---
+
+Example Subnet resource:
+
+---
+apiVersion: arubacloud.com/v1alpha1
+kind: Subnet
+metadata:
+  name: my-subnet
+  namespace: default
+spec:
+  tenant: my-tenant
+  tags:
+    - public
+  type: Advanced
+  default: false
+  network:
+    address: 192.168.1.0/25
+  dhcp:
+    enabled: true
+  vpcReference:
+    name: my-vpc
+    namespace: default
+  projectReference:
+    name: my-project
+    namespace: default
+---
+
+Available Resources:
+  - Vpc, Subnet
+  - CloudServer, BlockStorage
+  - ElasticIP, KeyPair
+  - SecurityGroup, SecurityRule
+  - Project
+
+Configure operator:
+
+  # Create secret with Vault AppRole credentials
+  $ kubectl create secret generic controller-manager \
+      --from-literal=role-id=YOUR_ROLE_ID \
+      --from-literal=role-secret=YOUR_ROLE_SECRET \
+      --namespace aruba-system
+
+  # Create configmap with API endpoints
+  $ kubectl create configmap controller-manager \
+      --from-literal=api-gateway=https://api.arubacloud.com \
+      --from-literal=keycloak-url=https://login.aruba.it/auth \
+      --from-literal=realm-api=cmp-new-apikey \
+      --from-literal=vault-address=http://vault0.default.svc.cluster.local:8200 \
+      --from-literal=role-path=approle \
+      --from-literal=kv-mount=kw \
+      --namespace aruba-system
+
+For more examples and documentation, visit:
+https://github.com/Arubacloud/arubacloud-resource-operator
+
+⚠️  Note: This operator is under active development. Review the documentation for latest updates.

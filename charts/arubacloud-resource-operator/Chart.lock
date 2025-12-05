@@ -1,0 +1,6 @@
+dependencies:
+- name: arubacloud-resource-operator-crd
+  repository: file://../arubacloud-resource-operator-crd
+  version: 0.1.0
+digest: sha256:9b24cbf8c7f550aa0c735d7a8033ced87482346670ea4d58553155256c48396b
+generated: "2025-12-05T12:15:39.5119811+01:00"

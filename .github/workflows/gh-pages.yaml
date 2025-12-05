@@ -47,22 +47,28 @@ jobs:
             helm-docs --chart-search-root "$dir"
           done
 
-      - name: Update chart dependencies
-        run: |
-          for dir in charts/*/; do
-            helm dependency update "$dir"
-          done
-
       - name: Package all charts
         run: |
           mkdir -p packaged
+          
+          # Package all charts (dependencies will be resolved from local paths during packaging)
           for dir in charts/*/; do
-            helm package "$dir" -d packaged
+            chart_name=$(basename "$dir")
+            echo "Packaging $chart_name"
+            # Package with dependency build
+            helm package "$dir" -d packaged --dependency-update || {
+              echo "Warning: Failed to package $chart_name with dependencies, trying without..."
+              helm package "$dir" -d packaged
+            }
           done
 
       - name: Generate index.yaml
         run: |
           helm repo index packaged --url https://arubacloud.github.io/helm-charts/
+
+      - name: Add .nojekyll file
+        run: |
+          touch packaged/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

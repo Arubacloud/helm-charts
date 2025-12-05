@@ -1,0 +1,51 @@
+############################################################
+#                                                          #
+#   █████╗ ██████╗ ██╗   ██╗██████╗  █████╗               #
+#  ██╔══██╗██╔══██╗██║   ██║██╔══██╗██╔══██╗              #
+#  ███████║██████╔╝██║   ██║██████╔╝███████║              #
+#  ██╔══██║██╔══██╗██║   ██║██╔══██╗██╔══██║              #
+#  ██║  ██║██║  ██║╚██████╔╝██████╔╝██║  ██║              #
+#  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝              #
+#                                                          #
+#   Arubacloud Resource Operator CRDs Installed!          #
+#                                                          #
+############################################################
+
+{{- /*
+NOTES.txt for arubacloud-resource-operator-crd
+*/ -}}
+
+Thank you for installing the Arubacloud Resource Operator CRDs!
+
+✅ The following Custom Resource Definitions have been installed:
+
+Infrastructure Resources:
+  - BlockStorage     (blockstorages.arubacloud.com)
+  - CloudServer      (cloudservers.arubacloud.com)
+  - ElasticIP        (elasticips.arubacloud.com)
+  - KeyPair          (keypairs.arubacloud.com)
+  - Project          (projects.arubacloud.com)
+
+Network Resources:
+  - Vpc              (vpcs.arubacloud.com)
+  - Subnet           (subnets.arubacloud.com)
+  - SecurityGroup    (securitygroups.arubacloud.com)
+  - SecurityRule     (securityrules.arubacloud.com)
+
+Verify installation:
+
+  $ kubectl get crds | grep arubacloud.com
+
+Next Steps:
+
+1. Install the operator controller:
+   $ helm install arubacloud-operator arubacloud/arubacloud-resource-operator -n aruba-system
+
+2. Configure Aruba Cloud credentials
+
+3. Start creating resources!
+
+For more details and examples, visit:
+https://github.com/Arubacloud/arubacloud-resource-operator
+
+⚠️  Note: These CRDs are required by the operator. Install the operator chart to manage resources.

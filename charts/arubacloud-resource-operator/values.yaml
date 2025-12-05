@@ -1,0 +1,62 @@
+# Default values for arubacloud-resource-operator
+
+# CRDs installation
+crds:
+  enabled: true  # Set to false if CRDs are already installed or managed separately
+
+controllerManager:
+  apiGateway: https://api.arubacloud.com
+  keycloakUrl: https://login.aruba.it/auth
+  kvMount: kw
+  manager:
+    args:
+    - --metrics-bind-address=:8443
+    - --leader-elect
+    - --health-probe-bind-address=:8081
+    - --config-map-name=aruba-controller-manager
+    - --secret-name=aruba-controller-manager
+    - --namespace=$(POD_NAMESPACE)
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    env:
+      configMapName: aruba-controller-manager
+      secretName: aruba-controller-manager
+    image:
+      repository: controller
+      tag: latest
+    resources:
+      limits:
+        cpu: 500m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+  nodeSelector: {}
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  realmApi: cmp-new-apikey
+  replicas: 1
+  roleId: ""
+  rolePath: approle
+  roleSecret: ""
+  tolerations: []
+  topologySpreadConstraints: []
+  vaultAddress: http://vault0.default.svc.cluster.local:8200
+kubernetesClusterDomain: cluster.local
+metricsService:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  type: ClusterIP
+serviceAccount:
+  annotations: {}
+  automount: true
+  create: true
+  name: ""
