@@ -1,0 +1,81 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "operator.fullname" . }}-manager-role
+  labels:
+  {{- include "operator.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - arubacloud.com
+  resources:
+  - blockstorages
+  - cloudservers
+  - elasticips
+  - keypairs
+  - projects
+  - securitygroups
+  - securityrules
+  - subnets
+  - vpcs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - arubacloud.com
+  resources:
+  - blockstorages/finalizers
+  - cloudservers/finalizers
+  - elasticips/finalizers
+  - keypairs/finalizers
+  - projects/finalizers
+  - securitygroups/finalizers
+  - securityrules/finalizers
+  - subnets/finalizers
+  - vpcs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - arubacloud.com
+  resources:
+  - blockstorages/status
+  - cloudservers/status
+  - elasticips/status
+  - keypairs/status
+  - projects/status
+  - securitygroups/status
+  - securityrules/status
+  - subnets/status
+  - vpcs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - arubacloud.com
+  resources:
+  - configmaps
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "operator.fullname" . }}-manager-rolebinding
+  labels:
+  {{- include "operator.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: '{{ include "operator.fullname" . }}-manager-role'
+subjects:
+- kind: ServiceAccount
+  name: '{{ include "operator.serviceAccountName" . }}'
+  namespace: '{{ .Release.Namespace }}'
