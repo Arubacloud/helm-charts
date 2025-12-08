@@ -56,7 +56,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - arubacloud.com
+  - ""
   resources:
   - configmaps
   - secrets
