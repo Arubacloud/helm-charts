@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "operator.fullname" . }}-controller-manager
+  name: {{ include "operator.controllerManagerName" . }}
   labels:
     control-plane: controller-manager
   {{- include "operator.labels" . | nindent 4 }}

@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "operator.fullname" . }}-leader-election-role
+  name: {{ include "operator.leaderElectionRoleName" . }}
   labels:
   {{- include "operator.labels" . | nindent 4 }}
 rules:
@@ -40,13 +40,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "operator.fullname" . }}-leader-election-rolebinding
+  name: {{ include "operator.leaderElectionRoleName" . }}-binding
   labels:
   {{- include "operator.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: '{{ include "operator.fullname" . }}-leader-election-role'
+  name: '{{ include "operator.leaderElectionRoleName" . }}'
 subjects:
 - kind: ServiceAccount
   name: '{{ include "operator.serviceAccountName" . }}'

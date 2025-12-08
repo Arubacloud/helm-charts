@@ -63,3 +63,51 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create the metrics service name with truncation to stay within 63 character limit
+*/}}
+{{- define "operator.metricsServiceName" -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- printf "%s-metrics" $fullname | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create the controller manager name with truncation
+*/}}
+{{- define "operator.controllerManagerName" -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- printf "%s-controller" $fullname | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create the leader election role name with truncation
+*/}}
+{{- define "operator.leaderElectionRoleName" -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- printf "%s-leader" $fullname | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create the manager role name with truncation
+*/}}
+{{- define "operator.managerRoleName" -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- printf "%s-manager" $fullname | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create the metrics auth role name with truncation
+*/}}
+{{- define "operator.metricsAuthRoleName" -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- printf "%s-metrics-auth" $fullname | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create the metrics reader role name with truncation
+*/}}
+{{- define "operator.metricsReaderRoleName" -}}
+{{- $fullname := include "operator.fullname" . -}}
+{{- printf "%s-metrics-reader" $fullname | trunc 63 | trimSuffix "-" }}
+{{- end }}
