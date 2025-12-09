@@ -7,23 +7,19 @@ crds:
 controllerManager:
   apiGateway: https://api.arubacloud.com
   keycloakUrl: https://login.aruba.it/auth
-  kvMount: kw
+  kvMount: kv
+  realmApi: cmp-new-apikey
+  replicas: 1
+  roleId: ""
+  rolePath: approle
+  roleSecret: ""
+  vaultAddress: http://vault0.default.svc.cluster.local:8200
   manager:
-    args:
-    - --metrics-bind-address=:8443
-    - --leader-elect
-    - --health-probe-bind-address=:8081
-    - --config-map-name=aruba-controller-manager
-    - --secret-name=aruba-controller-manager
-    - --namespace=$(POD_NAMESPACE)
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
         - ALL
-    env:
-      configMapName: aruba-controller-manager
-      secretName: aruba-controller-manager
     image:
       repository: ha.t0xe7uh231qhhb7.itbg.svc40.mycloudplatform.cloud/arubacloud/resource-operator
       tag: latest
@@ -39,15 +35,11 @@ controllerManager:
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
-  realmApi: cmp-new-apikey
-  replicas: 1
-  roleId: ""
-  rolePath: approle
-  roleSecret: ""
   tolerations: []
   topologySpreadConstraints: []
-  vaultAddress: http://vault0.default.svc.cluster.local:8200
+
 kubernetesClusterDomain: cluster.local
+
 metricsService:
   ports:
   - name: https
@@ -55,6 +47,7 @@ metricsService:
     protocol: TCP
     targetPort: 8443
   type: ClusterIP
+
 serviceAccount:
   annotations: {}
   automount: true
