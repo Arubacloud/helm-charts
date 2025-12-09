@@ -2,10 +2,10 @@ apiVersion: v1
 entries:
   actalis-cert-manager:
   - apiVersion: v2
-    created: "2025-12-08T15:03:28.812700585Z"
+    created: "2025-12-09T11:15:54.315757134Z"
     description: Installs Actalis EAB secret and ClusterIssuer for Actalis ACME (requires
       cert-manager to be installed separately)
-    digest: d45c4d1ecfb138187ba25764d8da780d1c28f7fe901a05a4aa96a6cdc0336214
+    digest: ca8b49eb97e18013a4e84c654c194f3e7d5bc6e5ee50f1af6927c48c9ce35c7a
     name: actalis-cert-manager
     type: application
     urls:
@@ -14,14 +14,14 @@ entries:
   arubacloud-resource-operator:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2025-12-08T15:03:28.813785634Z"
+    created: "2025-12-09T11:15:54.316644353Z"
     dependencies:
     - condition: crds.enabled
       name: arubacloud-resource-operator-crd
       repository: file://../arubacloud-resource-operator-crd
       version: 0.1.0
     description: Kubernetes operator for managing Aruba Cloud resources through CRDs
-    digest: 19c25595f57fbbc2e1ab83f172b1a497da71ac6be401169b9cc9ca0956a0fcdb
+    digest: ac98a36f2947030c4450660ee102e59699f67a6e40e5a470b835ad298bbd6814
     name: arubacloud-resource-operator
     type: application
     urls:
@@ -30,9 +30,9 @@ entries:
   arubacloud-resource-operator-crd:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2025-12-08T15:03:28.814481205Z"
+    created: "2025-12-09T11:15:54.31707612Z"
     description: Custom Resource Definitions for the Aruba Cloud Resource Operator
-    digest: 25dfea7fba5067990ddcad5752f2be7317123a42e3d769babd515c2afd6aa90f
+    digest: 05b6a7eeb62d300bcc87c206eb5883328e1de4014a8bfdec5b3d0ecf4d21488f
     name: arubacloud-resource-operator-crd
     type: application
     urls:
@@ -41,9 +41,9 @@ entries:
   cluster-autoscaler:
   - apiVersion: v2
     appVersion: 1.32.1
-    created: "2025-12-08T15:03:28.81592058Z"
+    created: "2025-12-09T11:15:54.317988105Z"
     description: Scales Kubernetes worker nodes within autoscaling groups.
-    digest: 30dc2270e17e3270efb2898b949211f189e33bb13f57740bc5bba04b88fa5807
+    digest: 5502c05c1c88b589c3219efaf7fa98bac0d8975ebf28222917b28e32c7c0a951
     home: https://github.com/Arubacloud/helm-charts/
     icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
     name: cluster-autoscaler
@@ -51,4 +51,4 @@ entries:
     urls:
     - https://arubacloud.github.io/helm-charts/cluster-autoscaler-1.0.0.tgz
     version: 1.0.0
-generated: "2025-12-08T15:03:28.810025583Z"
+generated: "2025-12-09T11:15:54.313336488Z"
