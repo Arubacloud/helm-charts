@@ -70,8 +70,6 @@ spec:
               tenant:
                 description: Tenant is the owning account/tenant of this project
                 type: string
-            required:
-            - tenant
             type: object
           status:
             description: Common status for all resources
@@ -138,8 +136,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed

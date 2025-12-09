@@ -21,9 +21,6 @@ controllerManager:
       capabilities:
         drop:
         - ALL
-    env:
-      configMapName: aruba-controller-manager
-      secretName: aruba-controller-manager
     image:
       repository: ha.t0xe7uh231qhhb7.itbg.svc40.mycloudplatform.cloud/arubacloud/resource-operator
       tag: latest
@@ -41,12 +38,15 @@ controllerManager:
       type: RuntimeDefault
   realmApi: cmp-new-apikey
   replicas: 1
+  vaultIsEnabled: false
+  vaultAddress: http://vault0.default.svc.cluster.local:8200
+  clientId: ""
+  clientSecret: ""
   roleId: ""
   rolePath: approle
   roleSecret: ""
   tolerations: []
   topologySpreadConstraints: []
-  vaultAddress: http://vault0.default.svc.cluster.local:8200
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:

@@ -10,6 +10,7 @@ data:
   kv-mount: {{ .Values.controllerManager.kvMount | quote }}
   realm-api: {{ .Values.controllerManager.realmApi | quote }}
   role-path: {{ .Values.controllerManager.rolePath | quote }}
+  vault-enabled: {{ .Values.controllerManager.vaultIsEnabled | quote }}
   vault-address: {{ .Values.controllerManager.vaultAddress | quote }}
 ---
 apiVersion: v1
@@ -19,8 +20,12 @@ metadata:
   labels:
   {{- include "operator.labels" . | nindent 4 }}
 data:
-  role-id: {{ required "controllerManager.roleId is required" .Values.controllerManager.roleId
-    | b64enc | quote }}
-  role-secret: {{ required "controllerManager.roleSecret is required" .Values.controllerManager.roleSecret
-    | b64enc | quote }}
+{{- if not .Values.controllerManager.vaultIsEnabled }}
+  client-id: {{ required "controllerManager.clientId is required when vault is not enabled" .Values.controllerManager.clientId | b64enc | quote }}
+  client-secret: {{ required "controllerManager.clientSecret is required when vault is not enabled" .Values.controllerManager.clientSecret | b64enc | quote }}
+{{- end }}
+{{- if .Values.controllerManager.vaultIsEnabled }}
+  role-id: {{ required "controllerManager.roleId is required when vault is enabled" .Values.controllerManager.roleId | b64enc | quote }}
+  role-secret: {{ required "controllerManager.roleSecret is required when vault is enabled" .Values.controllerManager.roleSecret | b64enc | quote }}
+{{- end }}
 type: Opaque

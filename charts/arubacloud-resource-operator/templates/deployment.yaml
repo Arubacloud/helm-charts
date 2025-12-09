@@ -27,9 +27,9 @@ spec:
         - /manager
         env:
         - name: CONFIG_MAP_NAME
-          value: {{ quote .Values.controllerManager.manager.env.configMapName }}
+          value: {{ include "operator.controllerManagerName" . }}
         - name: SECRET_NAME
-          value: {{ quote .Values.controllerManager.manager.env.secretName }}
+          value: {{ include "operator.controllerManagerName" . }}
         - name: POD_NAMESPACE
           valueFrom:
             fieldRef:

@@ -120,7 +120,6 @@ spec:
             - location
             - projectReference
             - sizeGb
-            - tenant
             type: object
           status:
             description: BlockStorageStatus defines the observed state of BlockStorage.
