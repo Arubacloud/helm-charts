@@ -88,10 +88,10 @@ If you prefer to manage CRDs separately or they are already installed, you can d
 helm install -n aruba-system arubacloud-operator arubacloud/arubacloud-resource-operator \
   --namespace aruba-system \
   --create-namespace \
-  --set controllerManager.roleId="6377c3da-9db4-6fcc-63c2-1f4420c3f9ba" \
+  --set controllerManager.roleId="YOUR_ROLE_ID" \
   --set controllerManager.rolePath=approle \
-  --set controllerManager.roleSecret="219c8e15-c9ac-8817-c7a1-58f5764d5128" \
-  --set controllerManager.vaultAddress="http://vault-active.vault.svc.cluster.local:8200" \  
+  --set controllerManager.roleSecret="YOUR_ROLE_SECRET" \
+  --set controllerManager.vaultAddress="YOUR_VAULT_ADDRESS" \
   --set crds.enabled=false
 ```
 
