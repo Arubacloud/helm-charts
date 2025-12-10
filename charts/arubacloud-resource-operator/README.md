@@ -82,11 +82,11 @@ helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
 
 The operator requires authentication credentials and API endpoints to communicate with Aruba Cloud services.
 
-#### Vault AppRole Secret Configuration for Aruba Cloud Operator
+#### Vault AppRole Configuration
 
 This guide explains how the operator can use HashiCorp Vault AppRole authentication to securely access Aruba Cloud credentials.
 
-Vault must be enabled in the operator configuration, and the operator requires access to the KV engine to retrieve secrets (**client-id** and **client-secret**) for OAuth client_credentials flow.
+Vault must be enabled in the operator configuration (**vault-enabled**), and the operator requires access to the KV engine to retrieve secrets (**client-id** and **client-secret**) for OAuth client_credentials flow.
 
 ###### Prerequisites
 
@@ -170,8 +170,9 @@ output:
   version            1
 ```
 
-###### Configuration to change in values.yaml
-Example with values from example above:
+###### Configuration values.yaml
+
+Values from example above to set correctly configuration in values.yaml:
 
 ```yaml
   vault-enabled: true
