@@ -109,7 +109,7 @@ Below is a summary of how to configure Vault:
   vault auth enable approle
 ```
 2. Create a policy allowing access to your KV engine path
-File: operator-policy.hcl 
+_File: operator-policy.hcl_
 ```bash
      path "kv/data/*" {
       capabilities = ["read"]
@@ -131,6 +131,9 @@ vault write auth/approle/role/operator-role \
 5. Get the Role ID
 ```bash
   vault read auth/approle/role/operator-role/role-id
+```
+_output:_
+```bash
   Key        Value
   ---        -----
   role_id    c7f48cd1-e464-7c80-b919-88b5a668e8f9
@@ -156,7 +159,7 @@ output:
 ```bash
   vault kv put kv/aru-77777 client-id="cmp-12345667" client-secret="xxxxxxxxxxxxxxxxxx"
 ```
-output:
+_output:_
 ```bash
   == Secret Path ==
   kv/data/aru-77777
