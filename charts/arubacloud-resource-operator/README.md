@@ -155,14 +155,14 @@ output:
 ```bash
   vault secrets enable -path=kv kv-v2
 ```
-8. Store the client ID and client secret for the tenant used in your CRs (for example, tenant ARU-77777)
+8. Store the client ID and client secret for the tenant used in your CRs.
 ```bash
-  vault kv put kv/aru-77777 client-id="cmp-12345667" client-secret="xxxxxxxxxxxxxxxxxx"
+  vault kv put kv/my-tenant client-id="cmp-12345667" client-secret="xxxxxxxxxxxxxxxxxx"
 ```
 _output:_
 ```bash
   == Secret Path ==
-  kv/data/aru-77777
+  kv/data/my-tenant
   ======= Metadata =======
   Key                Value
   ---                -----
