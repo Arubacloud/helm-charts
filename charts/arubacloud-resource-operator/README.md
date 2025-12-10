@@ -12,7 +12,6 @@ A Helm chart to install and configure the Aruba Cloud Resource Operator for mana
 ## Requirements
 - Kubernetes >= 1.21
 - Helm >= 3.0
-- HashiCorp Vault with AppRole authentication enabled
 - CRDs must be installed first (see Prerequisites)
 
 [![GitHub release](https://img.shields.io/github/tag/arubacloud/arubacloud-resource-operator.svg?label=release)](https://github.com/arubacloud/arubacloud-resource-operator/releases/latest)
@@ -23,44 +22,7 @@ A Helm chart to install and configure the Aruba Cloud Resource Operator for mana
 
 ### Prerequisites
 
-#### 1. HashiCorp Vault Setup
-
-**Important:** The operator requires a running HashiCorp Vault instance that is reachable from the Kubernetes cluster. Vault is used to securely store and retrieve Aruba Cloud API credentials (clientId and clientSecret).
-
-**Vault Requirements:**
-- Vault must be accessible from the operator pod (network connectivity required)
-- AppRole authentication method must be enabled
-- A Key-Value (KV) secrets engine must be mounted
-- Aruba Cloud API credentials must be stored in Vault
-
-**Configuration Parameters:**
-
-When installing the operator, you need to provide Vault connection details:
-
-- `controllerManager.vaultAddress`: The full URL of your Vault instance
-  - Example: `http://vault-active.vault.svc.cluster.local:8200`
-  - Must be reachable from the operator pod
-
-- `controllerManager.roleId`: The AppRole Role ID for authentication
-  - This is the identifier for the AppRole used by the operator
-  - Example: `6377c3da-9db4-6fcc-63c2-1f4420c3f9ba`
-
-- `controllerManager.roleSecret`: The AppRole Secret ID for authentication
-  - This is the secret credential paired with the Role ID
-  - Example: `219c8e15-c9ac-8817-c7a1-58f5764d5128`
-  - ⚠️ Keep this value secure and rotate it regularly
-
-- `controllerManager.rolePath`: The path where AppRole is mounted in Vault
-  - Default: `approle`
-  - Only change if you've customized your Vault AppRole mount path
-
-**What the operator fetches from Vault:**
-- Aruba Cloud API `clientId` (OAuth2 client identifier)
-- Aruba Cloud API `clientSecret` (OAuth2 client secret)
-
-These credentials are used to authenticate with the Aruba Cloud API to manage resources.
-
-#### 2.Installation
+**Important:** You must install the CRDs before installing this operator. The operator will not work unless CRDs are present in your cluster.
 
 #### Option 1: Automatic CRD Installation (Recommended)
 
@@ -69,15 +31,8 @@ By default, this chart automatically installs the required CRDs as a dependency.
 ```bash
 helm repo add arubacloud https://arubacloud.github.io/helm-charts/
 helm repo update
-
-helm install -n aruba-system arubacloud-operator arubacloud/arubacloud-resource-operator \
-  --namespace aruba-system \
-  --create-namespace \
-  --set controllerManager.roleId="YOUR_ROLE_ID" \
-  --set controllerManager.rolePath=approle \
-  --set controllerManager.roleSecret="YOUR_ROLE_SECRET" \
-  --set controllerManager.vaultAddress="YOUR_VAULT_ADDRESS"
-
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system --create-namespace
 ```
 
 #### Option 2: Manual CRD Installation
@@ -85,13 +40,8 @@ helm install -n aruba-system arubacloud-operator arubacloud/arubacloud-resource-
 If you prefer to manage CRDs separately or they are already installed, you can disable automatic CRD installation:
 
 ```bash
-helm install -n aruba-system arubacloud-operator arubacloud/arubacloud-resource-operator \
-  --namespace aruba-system \
-  --create-namespace \
-  --set controllerManager.roleId="YOUR_ROLE_ID" \
-  --set controllerManager.rolePath=approle \
-  --set controllerManager.roleSecret="YOUR_ROLE_SECRET" \
-  --set controllerManager.vaultAddress="YOUR_VAULT_ADDRESS" \
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system --create-namespace \
   --set crds.enabled=false
 ```
 
@@ -105,55 +55,170 @@ Verify CRDs are installed:
 kubectl get crds | grep arubacloud.com
 ```
 
+### Install the chart
+
+Add the arubacloud Helm repository (if not already added):
+```bash
+helm repo add arubacloud https://arubacloud.github.io/helm-charts/
+helm repo update
+```
+
+Install the operator with automatic CRD installation (default):
+```bash
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system --create-namespace
+```
+
+Or install without CRDs (if managing them separately):
+```bash
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system --create-namespace \
+  --set crds.enabled=false
+```
+
+## Configuration
+
+### Required Secrets and ConfigMaps
+
+The operator requires authentication credentials and API endpoints to communicate with Aruba Cloud services.
+
+#### Vault AppRole Configuration
+
+This guide explains how the operator can use HashiCorp Vault AppRole authentication to securely access Aruba Cloud credentials.
+
+Vault must be enabled in the operator configuration (**vault-enabled**), and the operator requires access to the KV engine to retrieve secrets (**client-id** and **client-secret**) for OAuth client_credentials flow.
+
+###### Prerequisites
+
+* Vault is running and accessible.
+* A token with appropriate capabilities (or root token) is available.
+* KV engine is enabled or can be enabled.
+* Namespace usage (optional) is known if relevant.
+
+###### Steps to Configure Vault
+
+Below is a summary of how to configure Vault:
+
+0. Export environment variables (address and root token, or a token with the required capabilities)
+```bash
+  export VAULT_ADDRESS=http://localhost:8200
+  export VAULT_TOKEN=hvs.xxxxxxxxxxxxxxxxxxxx
+```
+1. Enable AppRole auth
+```bash
+  vault auth enable approle
+```
+2. Create a policy allowing access to your KV engine path
+_File: operator-policy.hcl_
+```bash
+     path "kv/data/*" {
+      capabilities = ["read"]
+    }
+```
+3. Write the policy
+```bash
+  vault policy write operator-policy operator-policy.hcl
+```
+4. Create an AppRole and assign the policy
+```bash
+vault write auth/approle/role/operator-role \
+  token_policies="operator-policy" \
+  secret_id_ttl=0 \
+  secret_id_num_uses=0 \
+  token_ttl=1h \
+  token_max_ttl=4h
+```
+5. Get the Role ID
+```bash
+  vault read auth/approle/role/operator-role/role-id
+```
+_output:_
+```bash
+  Key        Value
+  ---        -----
+  role_id    c7f48cd1-e464-7c80-b919-88b5a668e8f9
+```
+6. Get the Secret ID
+```bash
+  vault write -f auth/approle/role/operator-role/secret-id
+```
+output:
+```bash
+  Key                   Value
+  ---                   -----
+  secret_id             1aee83c8-fafa-6cf9-cc84-fe1decd6625b
+  secret_id_accessor    5d14319e-052c-fec6-42c0-9b6a643d0664
+  secret_id_num_uses    0
+  secret_id_ttl         0s
+```
+7. Enable KV version 2 using your chosen path (in this case kv)
+```bash
+  vault secrets enable -path=kv kv-v2
+```
+8. Store the client ID and client secret for the tenant used in your CRs.
+```bash
+  vault kv put kv/my-tenant client-id="cmp-12345667" client-secret="xxxxxxxxxxxxxxxxxx"
+```
+_output:_
+```bash
+  == Secret Path ==
+  kv/data/my-tenant
+  ======= Metadata =======
+  Key                Value
+  ---                -----
+  created_time       2025-12-10T09:14:31.121191577Z
+  custom_metadata    <nil>
+  deletion_time      n/a
+  destroyed          false
+  version            1
+```
+
+###### Configuration values.yaml
+
+Values from example above to set correctly configuration in values.yaml:
+
+```yaml
+  vault-enabled: true
+  vault-address: http://localhost:8200
+  role-path: approle
+  kv-mount: kv
+  role-namespace: ""
+  role-id: c7f48cd1-e464-7c80-b919-88b5a668e8f9
+  role-secret: 1aee83c8-fafa-6cf9-cc84-fe1decd6625b
+```
+Replace values with your Vault AppRole credentials.
+
+#### Create API Configuration
+
+Configure API endpoints and Vault settings:
+
+```bash
+kubectl create configmap controller-manager \
+  --from-literal=api-gateway=https://api.arubacloud.com \
+  --from-literal=keycloak-url=https://login.aruba.it/auth \
+  --from-literal=realm-api=cmp-new-apikey \
+  --from-literal=vault-address=http://vault0.default.svc.cluster.local:8200 \
+  --from-literal=role-path=approle \
+  --from-literal=kv-mount=kv \
+  --namespace aruba-system
+```
+
+Adjust the values according to your environment, particularly:
+- `api-gateway`: Aruba Cloud API endpoint
+- `keycloak-url`: Authentication service URL
+- `vault-address`: Your Vault instance address
+- `kv-mount`: Key-Value mount path in Vault
+
 ## Parameters
 
-### Global Parameters
-
-| Name                           | Description                                      | Default                        |
-|--------------------------------|--------------------------------------------------|--------------------------------|
-| `crds.enabled`                 | Install CRDs as a dependency (set to false if managing CRDs separately) | `true` |
-| `kubernetesClusterDomain`      | Kubernetes cluster domain                        | `cluster.local`                |
-
-### Controller Manager Parameters
-
-| Name                                              | Description                                      | Default                        |
-|---------------------------------------------------|--------------------------------------------------|--------------------------------|
-| `controllerManager.replicas`                      | Number of operator replicas                      | `1`                            |
-| `controllerManager.apiGateway`                    | Aruba Cloud API endpoint URL                     | `https://api.arubacloud.com`   |
-| `controllerManager.keycloakUrl`                   | Keycloak authentication service URL              | `https://login.aruba.it/auth`  |
-| `controllerManager.realmApi`                      | Keycloak realm for API authentication            | `cmp-new-apikey`               |
-| `controllerManager.vaultAddress`                  | HashiCorp Vault server URL (must be reachable)   | `http://vault0.default.svc.cluster.local:8200` |
-| `controllerManager.roleId`                        | Vault AppRole Role ID (required)                 | `""`                           |
-| `controllerManager.roleSecret`                    | Vault AppRole Secret ID (required)               | `""`                           |
-| `controllerManager.rolePath`                      | Vault AppRole mount path                         | `approle`                      |
-| `controllerManager.kvMount`                       | Vault KV secrets engine mount path               | `kv`                           |
-| `controllerManager.manager.image.repository`      | Operator container image repository              | (from values.yaml)             |
-| `controllerManager.manager.image.tag`             | Operator container image tag                     | `latest`                       |
-| `controllerManager.manager.resources.limits.cpu`    | CPU limit for operator container               | `500m`                         |
-| `controllerManager.manager.resources.limits.memory` | Memory limit for operator container            | `128Mi`                        |
-| `controllerManager.manager.resources.requests.cpu`  | CPU request for operator container             | `10m`                          |
-| `controllerManager.manager.resources.requests.memory` | Memory request for operator container        | `64Mi`                         |
-| `controllerManager.manager.containerSecurityContext` | Security context for the manager container    | (see values.yaml)              |
-| `controllerManager.podSecurityContext`            | Security context for operator pods               | (see values.yaml)              |
-| `controllerManager.nodeSelector`                  | Node selector for operator pods                  | `{}`                           |
-| `controllerManager.tolerations`                   | Tolerations for operator pods                    | `[]`                           |
-| `controllerManager.topologySpreadConstraints`     | Topology spread constraints for operator pods    | `[]`                           |
-
-### Service Account Parameters
-
-| Name                              | Description                                      | Default                        |
-|-----------------------------------|--------------------------------------------------|--------------------------------|
-| `serviceAccount.create`           | Create service account                           | `true`                         |
-| `serviceAccount.name`             | Service account name (generated if empty)        | `""`                           |
-| `serviceAccount.annotations`      | Annotations for service account                  | `{}`                           |
-| `serviceAccount.automount`        | Automount service account token                  | `true`                         |
-
-### Metrics Service Parameters
-
-| Name                              | Description                                      | Default                        |
-|-----------------------------------|--------------------------------------------------|--------------------------------|
-| `metricsService.type`             | Kubernetes service type for metrics              | `ClusterIP`                    |
-| `metricsService.ports`            | Ports configuration for metrics service          | (see values.yaml)              |
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `crds.enabled`      | Install CRDs as a dependency (set to false if managing CRDs separately) | `true` |
+| `namespace`         | Namespace where operator will be deployed        | `aruba-system`                 |
+| `replicaCount`      | Number of operator replicas                      | `1`                            |
+| `image.repository`  | Operator image repository                        | (from values.yaml)             |
+| `image.tag`         | Operator image tag                               | (from values.yaml)             |
+| `resources`         | Resource limits and requests                     | (from values.yaml)             |
 
 Refer to the [values.yaml](values.yaml) file for a complete list of configurable parameters.
 
