@@ -82,18 +82,107 @@ helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
 
 The operator requires authentication credentials and API endpoints to communicate with Aruba Cloud services.
 
-#### Create Vault AppRole Secret
+#### Vault AppRole Secret Configuration for Aruba Cloud Operator
 
-The operator uses HashiCorp Vault AppRole authentication to securely access Aruba Cloud credentials:
+This guide explains how the operator can use HashiCorp Vault AppRole authentication to securely access Aruba Cloud credentials.
 
+Vault must be enabled in the operator configuration, and the operator requires access to the KV engine to retrieve secrets (**client-id** and **client-secret**) for OAuth client_credentials flow.
+
+###### Prerequisites
+
+* Vault is running and accessible.
+* A token with appropriate capabilities (or root token) is available.
+* KV engine is enabled or can be enabled.
+* Namespace usage (optional) is known if relevant.
+
+###### Steps to Configure Vault
+
+Below is a summary of how to configure Vault:
+
+0. Export environment variables (address and root token, or a token with the required capabilities)
 ```bash
-kubectl create secret generic controller-manager \
-  --from-literal=role-id=YOUR_ROLE_ID \
-  --from-literal=role-secret=YOUR_ROLE_SECRET \
-  --namespace aruba-system
+  export VAULT_ADDRESS=http://localhost:8200
+  export VAULT_TOKEN=hvs.xxxxxxxxxxxxxxxxxxxx
+```
+1. Enable AppRole auth
+```bash
+  vault auth enable approle
+```
+2. Create a policy allowing access to your KV engine path
+File: operator-policy.hcl 
+```bash
+     path "kv/data/*" {
+      capabilities = ["read"]
+    }
+```
+3. Write the policy
+```bash
+  vault policy write operator-policy operator-policy.hcl
+```
+4. Create an AppRole and assign the policy
+```bash
+vault write auth/approle/role/operator-role \
+  token_policies="operator-policy" \
+  secret_id_ttl=0 \
+  secret_id_num_uses=0 \
+  token_ttl=1h \
+  token_max_ttl=4h
+```
+5. Get the Role ID
+```bash
+  vault read auth/approle/role/operator-role/role-id
+  Key        Value
+  ---        -----
+  role_id    c7f48cd1-e464-7c80-b919-88b5a668e8f9
+```
+6. Get the Secret ID
+```bash
+  vault write -f auth/approle/role/operator-role/secret-id
+```
+output:
+```bash
+  Key                   Value
+  ---                   -----
+  secret_id             1aee83c8-fafa-6cf9-cc84-fe1decd6625b
+  secret_id_accessor    5d14319e-052c-fec6-42c0-9b6a643d0664
+  secret_id_num_uses    0
+  secret_id_ttl         0s
+```
+7. Enable KV version 2 using your chosen path (in this case kv)
+```bash
+  vault secrets enable -path=kv kv-v2
+```
+8. Store the client ID and client secret for the tenant used in your CRs (for example, tenant ARU-77777)
+```bash
+  vault kv put kv/aru-77777 client-id="cmp-12345667" client-secret="xxxxxxxxxxxxxxxxxx"
+```
+output:
+```bash
+  == Secret Path ==
+  kv/data/aru-77777
+  ======= Metadata =======
+  Key                Value
+  ---                -----
+  created_time       2025-12-10T09:14:31.121191577Z
+  custom_metadata    <nil>
+  deletion_time      n/a
+  destroyed          false
+  version            1
 ```
 
-Replace `YOUR_ROLE_ID` and `YOUR_ROLE_SECRET` with your Vault AppRole credentials.
+###### Configuration to change in values.yaml
+Example with values from example above:
+
+```yaml
+  vault-enabled: true
+  vault-address: http://localhost:8200
+  role-path: approle
+  kv-mount: kv
+  role-namespace: ""
+  role-id: c7f48cd1-e464-7c80-b919-88b5a668e8f9
+  role-secret: 1aee83c8-fafa-6cf9-cc84-fe1decd6625b
+```
+Replace values with your Vault AppRole credentials.
 
 #### Create API Configuration
 
