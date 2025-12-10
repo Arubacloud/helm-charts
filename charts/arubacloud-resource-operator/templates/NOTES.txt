@@ -104,24 +104,6 @@ Available Resources:
   - SecurityGroup, SecurityRule
   - Project
 
-Configure operator:
-
-  # Create secret with Vault AppRole credentials
-  $ kubectl create secret generic controller-manager \
-      --from-literal=role-id=YOUR_ROLE_ID \
-      --from-literal=role-secret=YOUR_ROLE_SECRET \
-      --namespace aruba-system
-
-  # Create configmap with API endpoints
-  $ kubectl create configmap controller-manager \
-      --from-literal=api-gateway=https://api.arubacloud.com \
-      --from-literal=keycloak-url=https://login.aruba.it/auth \
-      --from-literal=realm-api=cmp-new-apikey \
-      --from-literal=vault-address=http://vault0.default.svc.cluster.local:8200 \
-      --from-literal=role-path=approle \
-      --from-literal=kv-mount=kw \
-      --namespace aruba-system
-
 For more examples and documentation, visit:
 https://github.com/Arubacloud/arubacloud-resource-operator
 

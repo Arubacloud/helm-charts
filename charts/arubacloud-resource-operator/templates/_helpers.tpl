@@ -111,3 +111,7 @@ Create the metrics reader role name with truncation
 {{- $fullname := include "operator.fullname" . -}}
 {{- printf "%s-metrics-reader" $fullname | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{- define "operator.config" -}}
+operator-config
+{{- end }}
