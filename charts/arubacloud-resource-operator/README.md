@@ -97,55 +97,28 @@ helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
   --create-namespace \
   --set config.auth.mode=multi \
   --set config.auth.multi.vault.address=<vault-address> \
+  --set config.auth.multi.vault.rolePath=<vault-role-path> \
   --set config.auth.multi.vault.roleId=<vault-role-id> \
-  --set config.auth.multi.vault.roleSecret=<vault-role-secret>
-```
-
-Example with full Vault configuration:
-```bash
-helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
-  --namespace aruba-system \
-  --create-namespace \
-  --set controller.manager.image.tag=v0.0.1-alpha4 \
-  --set config.auth.mode=multi \
-  --set config.auth.multi.vault.address="http://vault-active.vault.svc.cluster.local:8200" \
-  --set config.auth.multi.vault.roleId="6377c3da-9db4-6fcc-63c2-1f4420c3f9ba" \
-  --set config.auth.multi.vault.rolePath=approle \
-  --set config.auth.multi.vault.roleSecret="219c8e15-c9ac-8817-c7a1-58f5764d5128" \
-  --set config.auth.multi.vault.kvMount=kv
-```
-
-#### Install Without CRDs
-
-If managing CRDs separately:
-```bash
-helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
-  --namespace aruba-system \
-  --create-namespace \
-  --set crds.enabled=false \
-  --set config.auth.mode=single \
-  --set config.auth.single.clientId=<your-client-id> \
-  --set config.auth.single.clientSecret=<your-client-secret>
+  --set config.auth.multi.vault.roleSecret=<vault-role-secret> \ 
+  --set config.auth.multi.vault.kvMount=<vault-role-kvMount>
 ```
 
 ## Configuration
 
-### Required Secrets and ConfigMaps
+### Prerequisites
 
-The operator requires authentication credentials and API endpoints to communicate with Aruba Cloud services.
+If you enable **multi** mode 
+
+* Vault is running and accessible.
+* A token with appropriate capabilities (or root token) is available.
+* KV engine is enabled or can be enabled.
+* Namespace usage (optional) is known if relevant.
 
 #### Vault AppRole Configuration
 
 This guide explains how the operator can use HashiCorp Vault AppRole authentication to securely access Aruba Cloud credentials.
 
 Vault must be enabled in the operator configuration (**vault-enabled**), and the operator requires access to the KV engine to retrieve secrets (**client-id** and **client-secret**) for OAuth client_credentials flow.
-
-###### Prerequisites
-
-* Vault is running and accessible.
-* A token with appropriate capabilities (or root token) is available.
-* KV engine is enabled or can be enabled.
-* Namespace usage (optional) is known if relevant.
 
 ###### Steps to Configure Vault
 
@@ -224,64 +197,6 @@ _output:_
   destroyed          false
   version            1
 ```
-
-###### Configuration values.yaml
-
-Values from example above to set correctly configuration in values.yaml:
-
-**Multi-tenant mode with Vault:**
-
-```yaml
-config:
-  gateway: https://api.arubacloud.com
-  auth:
-    idp: https://login.aruba.it/auth
-    realm: cmp-new-apikey
-    mode: multi  # Set to 'multi' for Vault-based multi-tenancy
-    multi:
-      vault:
-        address: http://localhost:8200
-        kvMount: kw
-        rolePath: approle
-        roleId: c7f48cd1-e464-7c80-b919-88b5a668e8f9
-        roleSecret: 1aee83c8-fafa-6cf9-cc84-fe1decd6625b
-```
-Replace values with your Vault AppRole credentials.
-
-**Single-tenant mode with direct credentials (default):**
-
-```yaml
-config:
-  gateway: https://api.arubacloud.com
-  auth:
-    idp: https://login.aruba.it/auth
-    realm: cmp-new-apikey
-    mode: single  # Default mode
-    single:
-      clientId: "your-client-id"
-      clientSecret: "your-client-secret"
-```
-
-#### Create API Configuration
-
-Configure API endpoints and Vault settings:
-
-```bash
-kubectl create configmap controller-manager \
-  --from-literal=api-gateway=https://api.arubacloud.com \
-  --from-literal=keycloak-url=https://login.aruba.it/auth \
-  --from-literal=realm-api=cmp-new-apikey \
-  --from-literal=vault-address=http://vault0.default.svc.cluster.local:8200 \
-  --from-literal=role-path=approle \
-  --from-literal=kv-mount=kv \
-  --namespace aruba-system
-```
-
-Adjust the values according to your environment, particularly:
-- `api-gateway`: Aruba Cloud API endpoint
-- `keycloak-url`: Authentication service URL
-- `vault-address`: Your Vault instance address
-- `kv-mount`: Key-Value mount path in Vault
 
 ## Parameters
 
