@@ -22,7 +22,13 @@ spec:
         kubectl.kubernetes.io/default-container: manager
     spec:
       containers:
-      - args: {{- toYaml .Values.controllerManager.manager.args | nindent 8 }}
+      - args:
+        - --metrics-bind-address=:8443
+        - --leader-elect
+        - --health-probe-bind-address=:8081
+        - --config-map-name={{ include "operator.config" . }}
+        - --secret-name={{ include "operator.config" . }}
+        - --namespace=$(POD_NAMESPACE)
         command:
         - /manager
         env:
