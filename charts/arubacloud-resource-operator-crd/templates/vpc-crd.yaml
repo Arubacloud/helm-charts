@@ -89,7 +89,6 @@ spec:
             required:
             - location
             - projectReference
-            - tenant
             type: object
           status:
             description: VpcStatus defines the observed state of Vpc.

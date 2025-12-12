@@ -103,7 +103,6 @@ spec:
             - billingPlan
             - location
             - projectReference
-            - tenant
             type: object
           status:
             description: ElasticIpStatus defines the observed state of ElasticIp.

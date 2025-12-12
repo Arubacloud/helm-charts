@@ -164,7 +164,6 @@ spec:
             - protocol
             - securityGroupReference
             - target
-            - tenant
             - vpcReference
             type: object
           status:

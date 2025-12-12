@@ -123,7 +123,6 @@ spec:
             - dhcp
             - network
             - projectReference
-            - tenant
             - type
             - vpcReference
             type: object
