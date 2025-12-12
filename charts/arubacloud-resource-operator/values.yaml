@@ -4,10 +4,24 @@
 crds:
   enabled: true  # Set to false if CRDs are already installed or managed separately
 
-controllerManager:
-  apiGateway: https://api.arubacloud.com
-  keycloakUrl: https://login.aruba.it/auth
-  kvMount: kw
+config:
+  gateway: https://api.arubacloud.com
+  auth:
+    idp: https://login.aruba.it/auth
+    realm: cmp-new-apikey
+    mode: single 
+    single:
+      clientId: ""
+      clientSecret: ""
+    multi:
+      vault:
+        address: http://vault0.default.svc.cluster.local:8200
+        kvMount: kw
+        rolePath: approle 
+        roleId: ""
+        roleSecret: ""
+
+controller:
   manager:
     args:
     - --metrics-bind-address=:8443
@@ -36,15 +50,7 @@ controllerManager:
     runAsNonRoot: true
     seccompProfile:
       type: RuntimeDefault
-  realmApi: cmp-new-apikey
   replicas: 1
-  vaultIsEnabled: false
-  vaultAddress: http://vault0.default.svc.cluster.local:8200
-  clientId: ""
-  clientSecret: ""
-  roleId: ""
-  rolePath: approle
-  roleSecret: ""
   tolerations: []
   topologySpreadConstraints: []
 kubernetesClusterDomain: cluster.local

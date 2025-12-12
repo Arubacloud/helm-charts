@@ -55,7 +55,7 @@ Verify CRDs are installed:
 kubectl get crds | grep arubacloud.com
 ```
 
-### Install the chart
+### Install the Chart
 
 Add the arubacloud Helm repository (if not already added):
 ```bash
@@ -63,17 +63,69 @@ helm repo add arubacloud https://arubacloud.github.io/helm-charts/
 helm repo update
 ```
 
-Install the operator with automatic CRD installation (default):
+#### Single-Tenant Installation (Default)
+
+For single-tenant deployments with direct OAuth credentials:
+
 ```bash
 helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
-  --namespace aruba-system --create-namespace
+  --namespace aruba-system \
+  --create-namespace \
+  --set config.auth.mode=single \
+  --set config.auth.single.clientId=<your-client-id> \
+  --set config.auth.single.clientSecret=<your-client-secret>
 ```
 
-Or install without CRDs (if managing them separately):
+Example with specific image version:
+```bash
+helm upgrade --install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system \
+  --create-namespace \
+  --set controller.manager.image.tag=v0.0.1-alpha4 \
+  --set config.auth.mode=single \
+  --set config.auth.single.clientId=cmp-4adf9b35-3d98-4233-a863-8ad48cd2a2f5 \
+  --set config.auth.single.clientSecret=i3HaYhQHDhczUWWaUYUeL2tZffeHzo4F
+```
+
+#### Multi-Tenant Installation (Vault-based)
+
+For multi-tenant deployments using HashiCorp Vault:
+
 ```bash
 helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
-  --namespace aruba-system --create-namespace \
-  --set crds.enabled=false
+  --namespace aruba-system \
+  --create-namespace \
+  --set config.auth.mode=multi \
+  --set config.auth.multi.vault.address=<vault-address> \
+  --set config.auth.multi.vault.roleId=<vault-role-id> \
+  --set config.auth.multi.vault.roleSecret=<vault-role-secret>
+```
+
+Example with full Vault configuration:
+```bash
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system \
+  --create-namespace \
+  --set controller.manager.image.tag=v0.0.1-alpha4 \
+  --set config.auth.mode=multi \
+  --set config.auth.multi.vault.address="http://vault-active.vault.svc.cluster.local:8200" \
+  --set config.auth.multi.vault.roleId="6377c3da-9db4-6fcc-63c2-1f4420c3f9ba" \
+  --set config.auth.multi.vault.rolePath=approle \
+  --set config.auth.multi.vault.roleSecret="219c8e15-c9ac-8817-c7a1-58f5764d5128" \
+  --set config.auth.multi.vault.kvMount=kv
+```
+
+#### Install Without CRDs
+
+If managing CRDs separately:
+```bash
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system \
+  --create-namespace \
+  --set crds.enabled=false \
+  --set config.auth.mode=single \
+  --set config.auth.single.clientId=<your-client-id> \
+  --set config.auth.single.clientSecret=<your-client-secret>
 ```
 
 ## Configuration
@@ -177,16 +229,38 @@ _output:_
 
 Values from example above to set correctly configuration in values.yaml:
 
+**Multi-tenant mode with Vault:**
+
 ```yaml
-  vault-enabled: true
-  vault-address: http://localhost:8200
-  role-path: approle
-  kv-mount: kv
-  role-namespace: ""
-  role-id: c7f48cd1-e464-7c80-b919-88b5a668e8f9
-  role-secret: 1aee83c8-fafa-6cf9-cc84-fe1decd6625b
+config:
+  gateway: https://api.arubacloud.com
+  auth:
+    idp: https://login.aruba.it/auth
+    realm: cmp-new-apikey
+    mode: multi  # Set to 'multi' for Vault-based multi-tenancy
+    multi:
+      vault:
+        address: http://localhost:8200
+        kvMount: kw
+        rolePath: approle
+        roleId: c7f48cd1-e464-7c80-b919-88b5a668e8f9
+        roleSecret: 1aee83c8-fafa-6cf9-cc84-fe1decd6625b
 ```
 Replace values with your Vault AppRole credentials.
+
+**Single-tenant mode with direct credentials (default):**
+
+```yaml
+config:
+  gateway: https://api.arubacloud.com
+  auth:
+    idp: https://login.aruba.it/auth
+    realm: cmp-new-apikey
+    mode: single  # Default mode
+    single:
+      clientId: "your-client-id"
+      clientSecret: "your-client-secret"
+```
 
 #### Create API Configuration
 
@@ -211,14 +285,61 @@ Adjust the values according to your environment, particularly:
 
 ## Parameters
 
+### Global Parameters
+
 | Name                | Description                                      | Default                        |
 |---------------------|--------------------------------------------------|--------------------------------|
 | `crds.enabled`      | Install CRDs as a dependency (set to false if managing CRDs separately) | `true` |
-| `namespace`         | Namespace where operator will be deployed        | `aruba-system`                 |
-| `replicaCount`      | Number of operator replicas                      | `1`                            |
-| `image.repository`  | Operator image repository                        | (from values.yaml)             |
-| `image.tag`         | Operator image tag                               | (from values.yaml)             |
-| `resources`         | Resource limits and requests                     | (from values.yaml)             |
+| `kubernetesClusterDomain` | Kubernetes cluster domain | `cluster.local` |
+
+### Configuration Parameters
+
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `config.gateway` | Aruba Cloud API gateway endpoint | `https://api.arubacloud.com` |
+| `config.auth.idp` | Keycloak/IDP authentication URL | `https://login.aruba.it/auth` |
+| `config.auth.realm` | API realm name | `cmp-new-apikey` |
+| `config.auth.mode` | Authentication mode: `single` or `multi` | `single` |
+| `config.auth.single.clientId` | OAuth client ID (required when mode is `single`) | `""` |
+| `config.auth.single.clientSecret` | OAuth client secret (required when mode is `single`) | `""` |
+| `config.auth.multi.vault.address` | Vault server address (used when mode is `multi`) | `http://vault0.default.svc.cluster.local:8200` |
+| `config.auth.multi.vault.kvMount` | Vault KV mount path (used when mode is `multi`) | `kw` |
+| `config.auth.multi.vault.rolePath` | Vault AppRole path (used when mode is `multi`) | `approle` |
+| `config.auth.multi.vault.roleId` | Vault AppRole ID (required when mode is `multi`) | `""` |
+| `config.auth.multi.vault.roleSecret` | Vault AppRole secret (required when mode is `multi`) | `""` |
+
+### Controller Parameters
+
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `controller.replicas` | Number of operator replicas | `1` |
+| `controller.manager.image.repository` | Operator image repository | (see values.yaml) |
+| `controller.manager.image.tag` | Operator image tag | `latest` |
+| `controller.manager.resources.limits.cpu` | CPU limit | `500m` |
+| `controller.manager.resources.limits.memory` | Memory limit | `128Mi` |
+| `controller.manager.resources.requests.cpu` | CPU request | `10m` |
+| `controller.manager.resources.requests.memory` | Memory request | `64Mi` |
+| `controller.nodeSelector` | Node selector for pod assignment | `{}` |
+| `controller.tolerations` | Tolerations for pod assignment | `[]` |
+| `controller.topologySpreadConstraints` | Topology spread constraints | `[]` |
+| `controller.podSecurityContext` | Pod security context | (see values.yaml) |
+| `controller.manager.containerSecurityContext` | Container security context | (see values.yaml) |
+
+### Service Account Parameters
+
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `serviceAccount.create` | Create service account | `true` |
+| `serviceAccount.name` | Service account name (generated if empty) | `""` |
+| `serviceAccount.annotations` | Service account annotations | `{}` |
+| `serviceAccount.automount` | Automount service account token | `true` |
+
+### Metrics Service Parameters
+
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `metricsService.type` | Metrics service type | `ClusterIP` |
+| `metricsService.ports` | Metrics service ports | (see values.yaml) |
 
 Refer to the [values.yaml](values.yaml) file for a complete list of configurable parameters.
 

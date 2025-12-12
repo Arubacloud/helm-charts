@@ -6,7 +6,7 @@ metadata:
     control-plane: controller-manager
   {{- include "operator.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.controllerManager.replicas }}
+  replicas: {{ .Values.controller.replicas }}
   selector:
     matchLabels:
       app.kubernetes.io/name: aruba
@@ -42,7 +42,7 @@ spec:
               fieldPath: metadata.namespace
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag
+        image: {{ .Values.controller.manager.image.repository }}:{{ .Values.controller.manager.image.tag
           | default .Chart.AppVersion }}
         livenessProbe:
           httpGet:
@@ -57,15 +57,15 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
-        resources: {{- toYaml .Values.controllerManager.manager.resources | nindent 10
+        resources: {{- toYaml .Values.controller.manager.resources | nindent 10
           }}
-        securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
+        securityContext: {{- toYaml .Values.controller.manager.containerSecurityContext
           | nindent 10 }}
-      nodeSelector: {{- toYaml .Values.controllerManager.nodeSelector | nindent 8 }}
-      securityContext: {{- toYaml .Values.controllerManager.podSecurityContext | nindent
+      nodeSelector: {{- toYaml .Values.controller.nodeSelector | nindent 8 }}
+      securityContext: {{- toYaml .Values.controller.podSecurityContext | nindent
         8 }}
       serviceAccountName: {{ include "operator.serviceAccountName" . }}
       terminationGracePeriodSeconds: 10
-      tolerations: {{- toYaml .Values.controllerManager.tolerations | nindent 8 }}
-      topologySpreadConstraints: {{- toYaml .Values.controllerManager.topologySpreadConstraints
+      tolerations: {{- toYaml .Values.controller.tolerations | nindent 8 }}
+      topologySpreadConstraints: {{- toYaml .Values.controller.topologySpreadConstraints
         | nindent 8 }}

@@ -5,13 +5,17 @@ metadata:
   labels:
   {{- include "operator.labels" . | nindent 4 }}
 data:
-  api-gateway: {{ .Values.controllerManager.apiGateway | quote }}
-  keycloak-url: {{ .Values.controllerManager.keycloakUrl | quote }}
-  kv-mount: {{ .Values.controllerManager.kvMount | quote }}
-  realm-api: {{ .Values.controllerManager.realmApi | quote }}
-  role-path: {{ .Values.controllerManager.rolePath | quote }}
-  vault-enabled: {{ .Values.controllerManager.vaultIsEnabled | quote }}
-  vault-address: {{ .Values.controllerManager.vaultAddress | quote }}
+  api-gateway: {{ .Values.config.gateway | quote }}
+  keycloak-url: {{ .Values.config.auth.idp | quote }}
+  realm-api: {{ .Values.config.auth.realm | quote }}
+{{- if eq .Values.config.auth.mode "multi" }}
+  kv-mount: {{ .Values.config.auth.multi.vault.kvMount | quote }}
+  role-path: {{ .Values.config.auth.multi.vault.rolePath | quote }}
+  vault-enabled: "true"
+  vault-address: {{ .Values.config.auth.multi.vault.address | quote }}
+{{- else }}
+  vault-enabled: "false"
+{{- end }}
 ---
 apiVersion: v1
 kind: Secret
@@ -20,12 +24,11 @@ metadata:
   labels:
   {{- include "operator.labels" . | nindent 4 }}
 data:
-{{- if not .Values.controllerManager.vaultIsEnabled }}
-  client-id: {{ required "controllerManager.clientId is required when vault is not enabled" .Values.controllerManager.clientId | b64enc | quote }}
-  client-secret: {{ required "controllerManager.clientSecret is required when vault is not enabled" .Values.controllerManager.clientSecret | b64enc | quote }}
-{{- end }}
-{{- if .Values.controllerManager.vaultIsEnabled }}
-  role-id: {{ required "controllerManager.roleId is required when vault is enabled" .Values.controllerManager.roleId | b64enc | quote }}
-  role-secret: {{ required "controllerManager.roleSecret is required when vault is enabled" .Values.controllerManager.roleSecret | b64enc | quote }}
+{{- if eq .Values.config.auth.mode "single" }}
+  client-id: {{ required "config.auth.single.clientId is required when mode is 'single'" .Values.config.auth.single.clientId | b64enc | quote }}
+  client-secret: {{ required "config.auth.single.clientSecret is required when mode is 'single'" .Values.config.auth.single.clientSecret | b64enc | quote }}
+{{- else if eq .Values.config.auth.mode "multi" }}
+  role-id: {{ required "config.auth.multi.vault.roleId is required when mode is 'multi'" .Values.config.auth.multi.vault.roleId | b64enc | quote }}
+  role-secret: {{ required "config.auth.multi.vault.roleSecret is required when mode is 'multi'" .Values.config.auth.multi.vault.roleSecret | b64enc | quote }}
 {{- end }}
 type: Opaque
