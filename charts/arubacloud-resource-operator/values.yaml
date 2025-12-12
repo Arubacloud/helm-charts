@@ -13,8 +13,8 @@ controllerManager:
     - --metrics-bind-address=:8443
     - --leader-elect
     - --health-probe-bind-address=:8081
-    - --config-map-name=aruba-controller-manager
-    - --secret-name=aruba-controller-manager
+    - --config-map-name=$(CONFIG_MAP_NAME)
+    - --secret-name=$(SECRET_NAME)
     - --namespace=$(POD_NAMESPACE)
     containerSecurityContext:
       allowPrivilegeEscalation: false
