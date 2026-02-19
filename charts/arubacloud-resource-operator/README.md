@@ -103,6 +103,47 @@ helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
   --set config.auth.multi.vault.kvMount=<vault-role-kvMount>
 ```
 
+##### Alternative: Using Secret References for Vault AppRole Credentials
+
+Instead of passing Vault AppRole credentials directly as values, you can reference an existing Kubernetes secret. This is useful for managing credentials with external secret management tools or for enhanced security.
+
+First, create a secret with your Vault AppRole credentials:
+```bash
+kubectl create secret generic vault-approle-credentials \
+  --namespace aruba-system \
+  --from-literal=role-id=<your-role-id> \
+  --from-literal=secret-id=<your-secret-id>
+```
+
+Then install the operator referencing the secret:
+```bash
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system \
+  --create-namespace \
+  --set config.auth.mode=multi \
+  --set config.auth.multi.vault.address=<vault-address> \
+  --set-json 'config.auth.multi.vault.roleIdFrom={"secretKeyRef":{"name":"vault-approle-credentials","key":"role-id"}}' \
+  --set-json 'config.auth.multi.vault.roleSecretFrom={"secretKeyRef":{"name":"vault-approle-credentials","key":"secret-id"}}'
+```
+
+Or using a values file:
+```yaml
+config:
+  auth:
+    mode: multi
+    multi:
+      vault:
+        address: http://vault0.default.svc.cluster.local:8200
+        roleIdFrom:
+          secretKeyRef:
+            name: vault-approle-credentials
+            key: role-id
+        roleSecretFrom:
+          secretKeyRef:
+            name: vault-approle-credentials
+            key: secret-id
+```
+
 ## Configuration
 
 ### Prerequisites
@@ -220,8 +261,10 @@ _output:_
 | `config.auth.multi.vault.address` | Vault server address (used when mode is `multi`) | `http://vault0.default.svc.cluster.local:8200` |
 | `config.auth.multi.vault.kvMount` | Vault KV mount path (used when mode is `multi`) | `kw` |
 | `config.auth.multi.vault.rolePath` | Vault AppRole path (used when mode is `multi`) | `approle` |
-| `config.auth.multi.vault.roleId` | Vault AppRole ID (required when mode is `multi`) | `""` |
-| `config.auth.multi.vault.roleSecret` | Vault AppRole secret (required when mode is `multi`) | `""` |
+| `config.auth.multi.vault.roleId` | Vault AppRole ID (required when mode is `multi` and `roleIdFrom` is not set) | `""` |
+| `config.auth.multi.vault.roleSecret` | Vault AppRole secret (required when mode is `multi` and `roleSecretFrom` is not set) | `""` |
+| `config.auth.multi.vault.roleIdFrom.secretKeyRef` | Reference to existing secret for Vault AppRole ID (alternative to `roleId`) | - |
+| `config.auth.multi.vault.roleSecretFrom.secretKeyRef` | Reference to existing secret for Vault AppRole secret (alternative to `roleSecret`) | - |
 
 ### Controller Parameters
 

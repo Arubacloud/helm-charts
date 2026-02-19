@@ -7,7 +7,7 @@ crds:
 config:
   gateway: https://api.arubacloud.com
   auth:
-    idp: https://login.aruba.it/auth
+    idp: https://mylogin.aruba.it/auth
     realm: cmp-new-apikey
     mode: single 
     single:
@@ -18,8 +18,20 @@ config:
         address: http://vault0.default.svc.cluster.local:8200
         kvMount: kw
         rolePath: approle 
+        # Direct string values (default method)
         roleId: ""
         roleSecret: ""
+        # Alternative: reference existing secret from external source 
+        # If roleIdFrom is set, roleId will be ignored
+        roleIdFrom:
+          secretKeyRef:
+            name: ""
+            key: ""
+        # If roleSecretFrom is set, roleSecret will be ignored
+        roleSecretFrom:
+          secretKeyRef:
+            name: ""
+            key: ""
 
 controller:
   manager:

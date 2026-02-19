@@ -28,7 +28,11 @@ data:
   client-id: {{ required "config.auth.single.clientId is required when mode is 'single'" .Values.config.auth.single.clientId | b64enc | quote }}
   client-secret: {{ required "config.auth.single.clientSecret is required when mode is 'single'" .Values.config.auth.single.clientSecret | b64enc | quote }}
 {{- else if eq .Values.config.auth.mode "multi" }}
-  role-id: {{ required "config.auth.multi.vault.roleId is required when mode is 'multi'" .Values.config.auth.multi.vault.roleId | b64enc | quote }}
-  role-secret: {{ required "config.auth.multi.vault.roleSecret is required when mode is 'multi'" .Values.config.auth.multi.vault.roleSecret | b64enc | quote }}
+  {{- if not .Values.config.auth.multi.vault.roleIdFrom }}
+  role-id: {{ required "config.auth.multi.vault.roleId is required when mode is 'multi' and roleIdFrom is not set" .Values.config.auth.multi.vault.roleId | b64enc | quote }}
+  {{- end }}
+  {{- if not .Values.config.auth.multi.vault.roleSecretFrom }}
+  role-secret: {{ required "config.auth.multi.vault.roleSecret is required when mode is 'multi' and roleSecretFrom is not set" .Values.config.auth.multi.vault.roleSecret | b64enc | quote }}
+  {{- end }}
 {{- end }}
 type: Opaque

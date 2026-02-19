@@ -42,6 +42,22 @@ spec:
               fieldPath: metadata.namespace
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
+{{- if eq .Values.config.auth.mode "multi" }}
+  {{- if .Values.config.auth.multi.vault.roleIdFrom }}
+        - name: ROLE_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.config.auth.multi.vault.roleIdFrom.secretKeyRef.name }}
+              key: {{ .Values.config.auth.multi.vault.roleIdFrom.secretKeyRef.key }}
+  {{- end }}
+  {{- if .Values.config.auth.multi.vault.roleSecretFrom }}
+        - name: ROLE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.config.auth.multi.vault.roleSecretFrom.secretKeyRef.name }}
+              key: {{ .Values.config.auth.multi.vault.roleSecretFrom.secretKeyRef.key }}
+  {{- end }}
+{{- end }}
         image: {{ .Values.controller.manager.image.repository }}:{{ .Values.controller.manager.image.tag
           | default .Chart.AppVersion }}
         livenessProbe:
