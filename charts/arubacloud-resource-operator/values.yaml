@@ -48,7 +48,7 @@ controller:
         drop:
         - ALL
     image:
-      repository: ha.t0xe7uh231qhhb7.itbg.svc40.mycloudplatform.cloud/arubacloud/resource-operator
+      repository: ghcr.io/arubacloud/arubacloud-resource-operator
       tag: latest
     resources:
       limits:
