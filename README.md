@@ -7,8 +7,8 @@ This repository hosts multiple Helm charts for Aruba Cloud, published via GitHub
 | Chart | Description | Version | Documentation |
 |-------|-------------|---------|---------------|
 | [actalis-cert-manager](./charts/actalis-cert-manager) | Installs cert-manager and configures Actalis ACME integration for automated certificate management | 0.1.0 | [README](./charts/actalis-cert-manager/README.md) |
-| [arubacloud-resource-operator](./charts/arubacloud-resource-operator) | Kubernetes operator for managing Aruba Cloud infrastructure resources through CRDs | 0.1.0 | [README](./charts/arubacloud-resource-operator/README.md) |
-| [arubacloud-resource-operator-crd](./charts/arubacloud-resource-operator-crd) | Custom Resource Definitions for the Aruba Cloud Resource Operator | 0.1.0 | [README](./charts/arubacloud-resource-operator-crd/README.md) |
+| [arubacloud-resource-operator](./charts/arubacloud-resource-operator) | Kubernetes operator for managing Aruba Cloud infrastructure resources through CRDs | 0.1.1 | [README](./charts/arubacloud-resource-operator/README.md) |
+| [arubacloud-resource-operator-crd](./charts/arubacloud-resource-operator-crd) | Custom Resource Definitions for the Aruba Cloud Resource Operator | 0.1.1 | [README](./charts/arubacloud-resource-operator-crd/README.md) |
 | [cluster-autoscaler](./charts/cluster-autoscaler) | Kubernetes cluster autoscaler for automatic node scaling | 0.1.0 | [README](./charts/cluster-autoscaler/README.md) |
 
 ## Structure
