@@ -1,19 +1,19 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: elasticips.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: elasticips.arubacloud.com
 spec:
   group: arubacloud.com
   names:
-    kind: ElasticIp
-    listKind: ElasticIpList
+    kind: ElasticIP
+    listKind: ElasticIPList
     plural: elasticips
     shortNames:
     - eip
+    - arueip
     singular: elasticip
   scope: Namespaced
   versions:
@@ -33,7 +33,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ElasticIp is the Schema for the elasticips API.
+        description: ElasticIP is the Schema for the elasticips API.
         properties:
           apiVersion:
             description: |-
@@ -53,30 +53,15 @@ spec:
           metadata:
             type: object
           spec:
-            description: ElasticIpSpec defines the desired state of ElasticIp.
+            description: ElasticIPSpec defines the desired state of ElasticIP.
             properties:
-              billingPlan:
-                description: BillingPlan specifies the billing configuration
-                properties:
-                  billingPeriod:
-                    description: BillingPeriod defines the billing period (Hour, Month,
-                      etc.)
-                    enum:
-                    - Hour
-                    - Month
-                    type: string
-                required:
-                - billingPeriod
-                type: object
-              location:
-                description: Location specifies the location for the elastic IP
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
-                type: object
+              billingPeriod:
+                default: Hour
+                description: BillingPeriod defines the billing period
+                enum:
+                - Hour
+                - Month
+                type: string
               projectReference:
                 description: ProjectReference references the Project that owns this
                   elastic IP
@@ -91,6 +76,10 @@ spec:
                 - name
                 - namespace
                 type: object
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the elastic IP
+                type: string
               tags:
                 description: Tags are labels associated with the elastic IP
                 items:
@@ -100,12 +89,12 @@ spec:
                 description: Tenant is the owning account/tenant of this elastic IP
                 type: string
             required:
-            - billingPlan
-            - location
+            - billingPeriod
             - projectReference
+            - region
             type: object
           status:
-            description: ElasticIpStatus defines the observed state of ElasticIp.
+            description: ElasticIPStatus defines the observed state of ElasticIP.
             properties:
               conditions:
                 description: Conditions represent the latest available observations
@@ -169,8 +158,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -185,7 +174,8 @@ spec:
                 format: date-time
                 type: string
               projectID:
-                description: ProjectID is the project ID where this elastic IP is created
+                description: ProjectID is the project ID where this elastic IP is
+                  created
                 type: string
               resourceID:
                 description: ResourceID is the unique identifier of the resource in
@@ -197,9 +187,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

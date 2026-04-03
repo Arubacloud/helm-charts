@@ -1,11 +1,10 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: blockstorages.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: blockstorages.arubacloud.com
 spec:
   group: arubacloud.com
   names:
@@ -14,6 +13,7 @@ spec:
     plural: blockstorages
     shortNames:
     - bs
+    - arubs
     singular: blockstorage
   scope: Namespaced
   versions:
@@ -56,6 +56,7 @@ spec:
             description: BlockStorageSpec defines the desired state of BlockStorage.
             properties:
               billingPeriod:
+                default: Hour
                 description: BillingPeriod defines the billing period (Hour, Month,
                   etc.)
                 enum:
@@ -65,21 +66,9 @@ spec:
               bootable:
                 description: Bootable indicates whether the block storage is bootable
                 type: boolean
-              dataCenter:
-                description: DataCenter specifies the data center for the block storage
-                type: string
               image:
                 description: Image specifies the image ID for the block storage
                 type: string
-              location:
-                description: Location specifies the location for the block storage
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
-                type: object
               projectReference:
                 description: ProjectReference references the Project that owns this
                   block storage
@@ -94,8 +83,13 @@ spec:
                 - name
                 - namespace
                 type: object
-              sizeGb:
-                description: SizeGb specifies the size of the block storage in GB
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the block storage
+                type: string
+              sizeGB:
+                default: 20
+                description: SizeGB is the size of the block storage in gigabytes
                 format: int32
                 maximum: 16384
                 minimum: 1
@@ -114,12 +108,16 @@ spec:
                 - Standard
                 - Performance
                 type: string
+              zone:
+                default: ITBG-1
+                description: Zone specifies the data center zone
+                type: string
             required:
             - billingPeriod
-            - dataCenter
-            - location
             - projectReference
-            - sizeGb
+            - region
+            - sizeGB
+            - zone
             type: object
           status:
             description: BlockStorageStatus defines the observed state of BlockStorage.
@@ -186,8 +184,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -202,8 +200,8 @@ spec:
                 format: date-time
                 type: string
               projectID:
-                description: ProjectID is the project ID where this block storage is
-                  created
+                description: ProjectID is the project ID where this block storage
+                  is created
                 type: string
               resourceID:
                 description: ResourceID is the unique identifier of the resource in
@@ -215,9 +213,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
