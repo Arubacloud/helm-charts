@@ -1,11 +1,10 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: keypairs.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: keypairs.arubacloud.com
 spec:
   group: arubacloud.com
   names:
@@ -14,6 +13,7 @@ spec:
     plural: keypairs
     shortNames:
     - kp
+    - arukp
     singular: keypair
   scope: Namespaced
   versions:
@@ -55,15 +55,6 @@ spec:
           spec:
             description: KeyPairSpec defines the desired state of KeyPair.
             properties:
-              location:
-                description: Location specifies the location for the keypair
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
-                type: object
               projectReference:
                 description: ProjectReference references the Project that owns this
                   keypair
@@ -78,6 +69,10 @@ spec:
                 - name
                 - namespace
                 type: object
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the key pair
+                type: string
               tags:
                 description: Tags are labels associated with the keypair
                 items:
@@ -91,8 +86,8 @@ spec:
                 minLength: 1
                 type: string
             required:
-            - location
             - projectReference
+            - region
             - value
             type: object
           status:
@@ -160,8 +155,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -188,9 +183,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

@@ -1,11 +1,10 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: securityrules.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: securityrules.arubacloud.com
 spec:
   group: arubacloud.com
   names:
@@ -14,6 +13,7 @@ spec:
     plural: securityrules
     shortNames:
     - sr
+    - arusr
     singular: securityrule
   scope: Namespaced
   versions:
@@ -67,15 +67,6 @@ spec:
                 - Ingress
                 - Egress
                 type: string
-              location:
-                description: Location specifies the location for the security rule
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
-                type: object
               port:
                 description: Port specifies the port or port range (e.g., "80", "80-90",
                   "ALL")
@@ -103,6 +94,10 @@ spec:
                 - ICMP
                 - ALL
                 type: string
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the security rule
+                type: string
               securityGroupReference:
                 description: SecurityGroupReference references the ArubaSecurityGroup
                   that owns this rule
@@ -125,8 +120,8 @@ spec:
               target:
                 description: Target specifies the target of the security rule
                 properties:
-                  kind:
-                    description: Kind specifies the type of target (e.g., "Ip", "SecurityGroup")
+                  type:
+                    description: Type specifies the type of target (e.g., "Ip", "SecurityGroup")
                     enum:
                     - Ip
                     - SecurityGroup
@@ -136,14 +131,15 @@ spec:
                       or security group reference)
                     type: string
                 required:
-                - kind
+                - type
                 - value
                 type: object
               tenant:
-                description: Tenant is the owning account/tenant of this security rule
+                description: Tenant is the owning account/tenant of this security
+                  rule
                 type: string
               vpcReference:
-                description: VpcReference references the ArubaVpc that contains the
+                description: VPCReference references the ArubaVpc that contains the
                   security group
                 properties:
                   name:
@@ -158,10 +154,10 @@ spec:
                 type: object
             required:
             - direction
-            - location
             - port
             - projectReference
             - protocol
+            - region
             - securityGroupReference
             - target
             - vpcReference
@@ -231,8 +227,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -247,8 +243,8 @@ spec:
                 format: date-time
                 type: string
               projectID:
-                description: ProjectID is the project ID where this security rule is
-                  created
+                description: ProjectID is the project ID where this security rule
+                  is created
                 type: string
               resourceID:
                 description: ResourceID is the unique identifier of the resource in
@@ -259,7 +255,7 @@ spec:
                   this rule
                 type: string
               vpcID:
-                description: VpcID is the VPC ID where this security rule is created
+                description: VPCID is the VPC ID where this security rule is created
                 type: string
             type: object
         type: object
@@ -267,9 +263,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

@@ -1,19 +1,19 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: vpcs.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: vpcs.arubacloud.com
 spec:
   group: arubacloud.com
   names:
-    kind: Vpc
-    listKind: VpcList
+    kind: VPC
+    listKind: VPCList
     plural: vpcs
     shortNames:
     - vpc
+    - aruvpc
     singular: vpc
   scope: Namespaced
   versions:
@@ -33,7 +33,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Vpc is the Schema for the vpcs API.
+        description: VPC is the Schema for the vpcs API.
         properties:
           apiVersion:
             description: |-
@@ -53,20 +53,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: VpcSpec defines the desired state of Vpc.
+            description: VPCSpec defines the desired state of VPC.
             properties:
-              location:
-                description: Location specifies the location for the vpc
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
-                type: object
               projectReference:
                 description: ProjectReference references the Project that owns this
-                  vpc
+                  VPC
                 properties:
                   name:
                     description: Name is the name of the referenced resource
@@ -78,20 +69,24 @@ spec:
                 - name
                 - namespace
                 type: object
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the VPC
+                type: string
               tags:
-                description: Tags are labels associated with the vpc
+                description: Tags are labels associated with the VPC
                 items:
                   type: string
                 type: array
               tenant:
-                description: Tenant is the owning account/tenant of this vpc
+                description: Tenant is the owning account/tenant of this VPC
                 type: string
             required:
-            - location
             - projectReference
+            - region
             type: object
           status:
-            description: VpcStatus defines the observed state of Vpc.
+            description: VPCStatus defines the observed state of VPC.
             properties:
               conditions:
                 description: Conditions represent the latest available observations
@@ -155,8 +150,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -171,7 +166,7 @@ spec:
                 format: date-time
                 type: string
               projectID:
-                description: ProjectID is the project ID where this vpc is created
+                description: ProjectID is the project ID where this VPC is created
                 type: string
               resourceID:
                 description: ResourceID is the unique identifier of the resource in
@@ -183,9 +178,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

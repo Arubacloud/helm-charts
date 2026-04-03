@@ -1,11 +1,10 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: securitygroups.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: securitygroups.arubacloud.com
 spec:
   group: arubacloud.com
   names:
@@ -14,6 +13,7 @@ spec:
     plural: securitygroups
     shortNames:
     - sg
+    - arusg
     singular: securitygroup
   scope: Namespaced
   versions:
@@ -55,18 +55,6 @@ spec:
           spec:
             description: SecurityGroupSpec defines the desired state of SecurityGroup.
             properties:
-              default:
-                description: Default indicates whether this is a default security group
-                type: boolean
-              location:
-                description: Location specifies the location for the security group
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
-                type: object
               projectReference:
                 description: ProjectReference references the Project that owns this
                   security group
@@ -81,16 +69,21 @@ spec:
                 - name
                 - namespace
                 type: object
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the security group
+                type: string
               tags:
                 description: Tags are labels associated with the security group
                 items:
                   type: string
                 type: array
               tenant:
-                description: Tenant is the owning account/tenant of this security group
+                description: Tenant is the owning account/tenant of this security
+                  group
                 type: string
               vpcReference:
-                description: VpcReference references the ArubaVpc that owns this security
+                description: VPCReference references the ArubaVpc that owns this security
                   group
                 properties:
                   name:
@@ -104,8 +97,8 @@ spec:
                 - namespace
                 type: object
             required:
-            - location
             - projectReference
+            - region
             - vpcReference
             type: object
           status:
@@ -173,8 +166,8 @@ spec:
                 - type
                 x-kubernetes-list-type: map
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -189,15 +182,15 @@ spec:
                 format: date-time
                 type: string
               projectID:
-                description: ProjectID is the project ID where this security group is
-                  created
+                description: ProjectID is the project ID where this security group
+                  is created
                 type: string
               resourceID:
                 description: ResourceID is the unique identifier of the resource in
                   the remote system
                 type: string
               vpcID:
-                description: VpcID is the VPC ID where this security group is created
+                description: VPCID is the VPC ID where this security group is created
                 type: string
             type: object
         type: object
@@ -205,9 +198,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

@@ -1,11 +1,10 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: cloudservers.arubacloud.com
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  labels:
-  {{- include "crd.labels" . | nindent 4 }}
+  name: cloudservers.arubacloud.com
 spec:
   group: arubacloud.com
   names:
@@ -14,6 +13,7 @@ spec:
     plural: cloudservers
     shortNames:
     - cs
+    - arucs
     singular: cloudserver
   scope: Namespaced
   versions:
@@ -69,14 +69,12 @@ spec:
                 - name
                 - namespace
                 type: object
-              dataCenter:
-                description: DataCenter specifies the data center
-                type: string
               dataVolumeReferences:
                 description: DataVolumeReferences references additional data volumes
                   to attach to the cloud server (optional)
                 items:
-                  description: ResourceReference represents a reference to another resource
+                  description: ResourceReference represents a reference to another
+                    resource
                   properties:
                     name:
                       description: Name is the name of the referenced resource
@@ -89,8 +87,9 @@ spec:
                   - namespace
                   type: object
                 type: array
-              elasticIpReference:
-                description: ElasticIpReference references an existing elastic IP (optional)
+              elasticIPReference:
+                description: ElasticIPReference references an existing elastic IP
+                  (optional)
                 properties:
                   name:
                     description: Name is the name of the referenced resource
@@ -103,10 +102,11 @@ spec:
                 - namespace
                 type: object
               flavorName:
-                description: FlavorId specifies the flavor/size of the cloud server
+                description: FlavorName specifies the flavor/size of the cloud server
                 type: string
               keyPairReference:
-                description: KeyPairReference references a key pair for SSH access (optional)
+                description: KeyPairReference references a key pair for SSH access
+                  (optional)
                 properties:
                   name:
                     description: Name is the name of the referenced resource
@@ -117,15 +117,6 @@ spec:
                 required:
                 - name
                 - namespace
-                type: object
-              location:
-                description: Location specifies the location for the cloud server
-                properties:
-                  value:
-                    description: Value is the location identifier (e.g., "ITBG-Bergamo")
-                    type: string
-                required:
-                - value
                 type: object
               projectReference:
                 description: ProjectReference references the Project that owns this
@@ -141,11 +132,16 @@ spec:
                 - name
                 - namespace
                 type: object
+              region:
+                default: ITBG-Bergamo
+                description: Region specifies the region for the cloud server
+                type: string
               securityGroupReferences:
                 description: SecurityGroupReferences references the security groups
                   for the cloud server
                 items:
-                  description: ResourceReference represents a reference to another resource
+                  description: ResourceReference represents a reference to another
+                    resource
                   properties:
                     name:
                       description: Name is the name of the referenced resource
@@ -163,7 +159,8 @@ spec:
                 description: SubnetReferences references the subnets where the cloud
                   server will be attached
                 items:
-                  description: ResourceReference represents a reference to another resource
+                  description: ResourceReference represents a reference to another
+                    resource
                   properties:
                     name:
                       description: Name is the name of the referenced resource
@@ -185,11 +182,8 @@ spec:
               tenant:
                 description: Tenant is the owning account/tenant of this cloud server
                 type: string
-              vpcPreset:
-                description: VpcPreset indicates whether to use VPC preset
-                type: boolean
               vpcReference:
-                description: VpcReference references the VPC where the cloud server
+                description: VPCReference references the VPC where the cloud server
                   will be created
                 properties:
                   name:
@@ -202,16 +196,20 @@ spec:
                 - name
                 - namespace
                 type: object
+              zone:
+                default: ITBG-1
+                description: Zone specifies the data center zone
+                type: string
             required:
             - bootVolumeReference
-            - dataCenter
             - flavorName
             - keyPairReference
-            - location
             - projectReference
+            - region
             - securityGroupReferences
             - subnetReferences
             - vpcReference
+            - zone
             type: object
           status:
             description: CloudServerStatus defines the observed state of CloudServer.
@@ -287,15 +285,15 @@ spec:
                 items:
                   type: string
                 type: array
-              elasticIpID:
-                description: ElasticIpID is the elastic IP ID if one is assigned
+              elasticIPID:
+                description: ElasticIPID is the elastic IP ID if one is assigned
                 type: string
               keyPairID:
                 description: KeyPairID is the key pair ID if one is specified
                 type: string
               message:
-                description: Message provides human-readable information about the current
-                  state
+                description: Message provides human-readable information about the
+                  current state
                 type: string
               observedGeneration:
                 description: ObservedGeneration is the most recent generation observed
@@ -318,14 +316,14 @@ spec:
                   the remote system
                 type: string
               securityGroupIDs:
-                description: SecurityGroupIDs are the security group IDs for this cloud
-                  server
+                description: SecurityGroupIDs are the security group IDs for this
+                  cloud server
                 items:
                   type: string
                 type: array
               subnetIDs:
-                description: SubnetIDs are the subnet IDs where this cloud server is
-                  attached
+                description: SubnetIDs are the subnet IDs where this cloud server
+                  is attached
                 items:
                   type: string
                 type: array
@@ -335,7 +333,7 @@ spec:
                   type: string
                 type: array
               vpcID:
-                description: VpcID is the VPC ID where this cloud server is created
+                description: VPCID is the VPC ID where this cloud server is created
                 type: string
             type: object
         type: object
@@ -343,9 +341,3 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
