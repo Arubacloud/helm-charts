@@ -2,26 +2,29 @@
 
 # CRDs installation
 crds:
-  enabled: true  # Set to false if CRDs are already installed or managed separately
+  enabled: true # Set to false if CRDs are already installed or managed separately
 
 config:
   gateway: https://api.arubacloud.com
   auth:
     idp: https://mylogin.aruba.it/auth
     realm: cmp-new-apikey
-    mode: single 
+    mode: single
     single:
       clientId: ""
       clientSecret: ""
     multi:
+      # -- How the Vault integration is provisioned. manual: user supplies all vault properties.
+      # auto: Vault is installed and configured automatically inside the cluster (dev/demo only).
+      setup: manual
       vault:
         address: http://vault0.default.svc.cluster.local:8200
         kvMount: kw
-        rolePath: approle 
+        rolePath: approle
         # Direct string values (default method)
         roleId: ""
         roleSecret: ""
-        # Alternative: reference existing secret from external source 
+        # Alternative: reference existing secret from external source
         # If roleIdFrom is set, roleId will be ignored
         roleIdFrom:
           secretKeyRef:
@@ -32,21 +35,29 @@ config:
           secretKeyRef:
             name: ""
             key: ""
+        # -- Settings used only when setup=auto. WARNING: installs Vault in dev mode — NOT for production.
+        auto:
+          # -- Kubernetes namespace where Vault will be deployed
+          namespace: vault
+          # -- Vault Helm chart version to install
+          helmChartVersion: "0.32.0"
+          # -- Vault dev root token (used for initial configuration only)
+          devRootToken: "root"
 
 controller:
   manager:
     args:
-    - --metrics-bind-address=:8443
-    - --leader-elect
-    - --health-probe-bind-address=:8081
-    - --config-map-name=$(CONFIG_MAP_NAME)
-    - --secret-name=$(SECRET_NAME)
-    - --namespace=$(POD_NAMESPACE)
+      - --metrics-bind-address=:8443
+      - --leader-elect
+      - --health-probe-bind-address=:8081
+      - --config-map-name=$(CONFIG_MAP_NAME)
+      - --secret-name=$(SECRET_NAME)
+      - --namespace=$(POD_NAMESPACE)
     containerSecurityContext:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
-        - ALL
+          - ALL
     image:
       repository: ghcr.io/arubacloud/arubacloud-resource-operator
       tag: latest
@@ -68,13 +79,43 @@ controller:
 kubernetesClusterDomain: cluster.local
 metricsService:
   ports:
-  - name: https
-    port: 8443
-    protocol: TCP
-    targetPort: 8443
+    - name: https
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
   type: ClusterIP
 serviceAccount:
   annotations: {}
   automount: true
   create: true
   name: ""
+
+# -- Vault sub-chart values. Set vault.enabled=true when config.auth.multi.setup=auto.
+# fullnameOverride ensures the Vault service is always reachable at http://vault.<namespace>.svc:8200
+# regardless of the Helm release name.
+# WARNING: dev mode is enabled by default — NOT for production use.
+vault:
+  # -- Set to true to install Vault as a sub-chart (required for setup=auto)
+  enabled: false
+  fullnameOverride: "vault"
+  injector:
+    enabled: false
+  server:
+    enabled: true
+    # Dev mode: in-memory storage, no PVC needed. NOT for production.
+    standalone:
+      enabled: false
+    dev:
+      enabled: true
+      devRootToken: "root"
+    # Disable persistent storage — dev mode is in-memory only
+    dataStorage:
+      enabled: false
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 8200
+    ingress:
+      enabled: false
+  ui:
+    enabled: true
