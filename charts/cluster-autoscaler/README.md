@@ -48,7 +48,6 @@ You must provide some minimal configuration to install aruba-cluster-autoscaler.
 
 The following parameters are required:
 
-- `cloudProvider=aruba`
 - `arubaClientID: "your-client-id"`
 - `arubaClientSecret: "your-client-secret"`
 - `arubaProjectID: "your-aruba-project-id"`
