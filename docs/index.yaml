@@ -2,52 +2,53 @@ apiVersion: v1
 entries:
   actalis-cert-manager:
   - apiVersion: v2
-    created: "2026-06-22T10:34:46.215964111Z"
+    appVersion: 1.0.0
+    created: "2026-06-22T10:45:58.889482868Z"
     description: Installs Actalis EAB secret and ClusterIssuer for Actalis ACME (requires
       cert-manager to be installed separately)
-    digest: 04e8870036dbbef310397adf80f0d106b1e8fe3eaa2948b41b079f2058a8c83e
+    digest: 97ffb57112f9c4022fd122da8642e25baa3222ab218c137873608201ef544819
     name: actalis-cert-manager
     type: application
     urls:
-    - https://arubacloud.github.io/helm-charts/actalis-cert-manager-0.1.0.tgz
-    version: 0.1.0
+    - https://arubacloud.github.io/helm-charts/actalis-cert-manager-1.0.0.tgz
+    version: 1.0.0
   arubacloud-resource-operator:
   - apiVersion: v2
-    appVersion: 0.2.0
-    created: "2026-06-22T10:34:46.220370731Z"
+    appVersion: 1.0.0
+    created: "2026-06-22T10:45:58.894044543Z"
     dependencies:
     - condition: crds.enabled
       name: arubacloud-resource-operator-crd
       repository: file://../arubacloud-resource-operator-crd
-      version: 0.1.1
+      version: 1.0.0
     - condition: vault.enabled
       name: vault
       repository: https://helm.releases.hashicorp.com
       version: 0.32.0
     description: Kubernetes operator for managing Aruba Cloud resources through CRDs
-    digest: 97330eb6a2733ff4814d3fcc3de8858e9076b0b2d7c8e612994915e1ccde3411
+    digest: 5d44f8c5ab1499881262f3aefc88fcc2f6809a604fd9f203100e2f0faf99533c
     name: arubacloud-resource-operator
     type: application
     urls:
-    - https://arubacloud.github.io/helm-charts/arubacloud-resource-operator-0.2.0.tgz
-    version: 0.2.0
+    - https://arubacloud.github.io/helm-charts/arubacloud-resource-operator-1.0.0.tgz
+    version: 1.0.0
   arubacloud-resource-operator-crd:
   - apiVersion: v2
-    appVersion: 0.1.1
-    created: "2026-06-22T10:34:46.22071963Z"
+    appVersion: 1.0.0
+    created: "2026-06-22T10:45:58.894414441Z"
     description: Custom Resource Definitions for the Aruba Cloud Resource Operator
-    digest: 992749b121535d6ebc8546c38b1856c549dfd4d9de555e9465c24fb819c13770
+    digest: de44e97abe5a819d1c47420dfe08cd5b541f1d8f0438664502aa6eab36a78a59
     name: arubacloud-resource-operator-crd
     type: application
     urls:
-    - https://arubacloud.github.io/helm-charts/arubacloud-resource-operator-crd-0.1.1.tgz
-    version: 0.1.1
+    - https://arubacloud.github.io/helm-charts/arubacloud-resource-operator-crd-1.0.0.tgz
+    version: 1.0.0
   cluster-autoscaler:
   - apiVersion: v2
     appVersion: 1.32.1
-    created: "2026-06-22T10:34:46.22162104Z"
+    created: "2026-06-22T10:45:58.895331Z"
     description: Scales Kubernetes worker nodes within autoscaling groups.
-    digest: e28140548bb239a6d06f3fba8e76c890f856335ff0424fc26440250c8853c642
+    digest: aa90ed1c28c465200cafd7c321af88d9c2a39b0e353897830b240036c2f31825
     home: https://github.com/Arubacloud/helm-charts/
     icon: https://github.com/kubernetes/kubernetes/raw/master/logo/logo.png
     name: cluster-autoscaler
@@ -55,4 +56,4 @@ entries:
     urls:
     - https://arubacloud.github.io/helm-charts/cluster-autoscaler-1.0.0.tgz
     version: 1.0.0
-generated: "2026-06-22T10:34:46.213454527Z"
+generated: "2026-06-22T10:45:58.886903281Z"
