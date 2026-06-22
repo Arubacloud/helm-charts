@@ -1,0 +1,15 @@
+{{- if eq .Values.config.auth.multi.setup "auto" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-operator-policy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "operator.labels" . | nindent 4 }}
+data:
+  operator-policy.hcl: |
+    path "kv/data/*" {
+      capabilities = ["read"]
+    }
+{{- end }}

@@ -43,19 +43,23 @@ spec:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
 {{- if eq .Values.config.auth.mode "multi" }}
-  {{- if .Values.config.auth.multi.vault.roleIdFrom }}
+  {{- if eq .Values.config.auth.multi.setup "auto" }}
+  {{- /* In auto mode credentials are patched directly into the operator config Secret by vault-config-job. */}}
+  {{- else }}
+    {{- if .Values.config.auth.multi.vault.roleIdFrom.secretKeyRef.name }}
         - name: ROLE_ID
           valueFrom:
             secretKeyRef:
               name: {{ .Values.config.auth.multi.vault.roleIdFrom.secretKeyRef.name }}
               key: {{ .Values.config.auth.multi.vault.roleIdFrom.secretKeyRef.key }}
-  {{- end }}
-  {{- if .Values.config.auth.multi.vault.roleSecretFrom }}
+    {{- end }}
+    {{- if .Values.config.auth.multi.vault.roleSecretFrom.secretKeyRef.name }}
         - name: ROLE_SECRET
           valueFrom:
             secretKeyRef:
               name: {{ .Values.config.auth.multi.vault.roleSecretFrom.secretKeyRef.name }}
               key: {{ .Values.config.auth.multi.vault.roleSecretFrom.secretKeyRef.key }}
+    {{- end }}
   {{- end }}
 {{- end }}
         image: {{ .Values.controller.manager.image.repository }}:{{ .Values.controller.manager.image.tag
@@ -77,6 +81,39 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controller.manager.containerSecurityContext
           | nindent 10 }}
+{{- if eq .Values.config.auth.multi.setup "auto" }}
+      initContainers:
+      - name: wait-for-vault-credentials
+        image: bitnami/kubectl:latest
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for vault-approle-credentials secret to exist..."
+          until [ "$(kubectl get secret {{ include "operator.config" . }} --namespace=$POD_NAMESPACE -o jsonpath='{.data.role-id}' 2>/dev/null)" != "" ]; do
+            echo "Waiting for role-id to be populated in operator config secret..."
+            sleep 5
+          done
+          echo "Operator config secret has credentials, starting."
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 64Mi
+          requests:
+            cpu: 10m
+            memory: 32Mi
+{{- end }}
       nodeSelector: {{- toYaml .Values.controller.nodeSelector | nindent 8 }}
       securityContext: {{- toYaml .Values.controller.podSecurityContext | nindent
         8 }}
