@@ -33,10 +33,10 @@ data:
   role-id: ""
   secret-id: ""
   {{- else }}
-  {{- if not .Values.config.auth.multi.vault.roleIdFrom }}
+  {{- if not .Values.config.auth.multi.vault.roleIdFrom.secretKeyRef.name }}
   role-id: {{ required "config.auth.multi.vault.roleId is required when mode is 'multi' and roleIdFrom is not set" .Values.config.auth.multi.vault.roleId | b64enc | quote }}
   {{- end }}
-  {{- if not .Values.config.auth.multi.vault.roleSecretFrom }}
+  {{- if not .Values.config.auth.multi.vault.roleSecretFrom.secretKeyRef.name }}
   secret-id: {{ required "config.auth.multi.vault.roleSecret is required when mode is 'multi' and roleSecretFrom is not set" .Values.config.auth.multi.vault.roleSecret | b64enc | quote }}
   {{- end }}
   {{- end }}
