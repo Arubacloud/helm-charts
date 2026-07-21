@@ -90,12 +90,14 @@ serviceAccount:
   create: true
   name: ""
 
-# -- Vault sub-chart values. Set vault.enabled=true when config.auth.multi.setup=auto.
+# -- Vault sub-chart values.
+# Set vault.enabled=true  when config.auth.multi.setup=auto  (chart installs and configures Vault).
+# Set vault.enabled=false when config.auth.multi.setup=manual (you supply the Vault address/credentials).
 # fullnameOverride ensures the Vault service is always reachable at http://vault.<namespace>.svc:8200
 # regardless of the Helm release name.
 # WARNING: dev mode is enabled by default — NOT for production use.
 vault:
-  # -- Set to true to install Vault as a sub-chart (required for setup=auto)
+  # -- Set to true to install Vault as a sub-chart (required for setup=auto; must be false for setup=manual)
   enabled: true
   fullnameOverride: "vault"
   injector:

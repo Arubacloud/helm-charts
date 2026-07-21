@@ -1,3 +1,4 @@
+{{- include "operator.validate" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -81,7 +82,7 @@ spec:
           }}
         securityContext: {{- toYaml .Values.controller.manager.containerSecurityContext
           | nindent 10 }}
-{{- if eq .Values.config.auth.multi.setup "auto" }}
+{{- if and (eq .Values.config.auth.mode "multi") (eq .Values.config.auth.multi.setup "auto") }}
       initContainers:
       - name: wait-for-vault-credentials
         image: bitnami/kubectl:latest

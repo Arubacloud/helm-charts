@@ -115,3 +115,15 @@ Create the metrics reader role name with truncation
 {{- define "operator.config" -}}
 operator-config
 {{- end }}
+
+{{/*
+Validate that vault.enabled is consistent with config.auth.multi.setup.
+*/}}
+{{- define "operator.validate" -}}
+{{- if and (eq .Values.config.auth.mode "multi") (eq .Values.config.auth.multi.setup "manual") .Values.vault.enabled }}
+{{- fail "vault.enabled=true conflicts with config.auth.multi.setup=manual. Add --set vault.enabled=false when providing Vault configuration manually." }}
+{{- end }}
+{{- if and (eq .Values.config.auth.mode "multi") (eq .Values.config.auth.multi.setup "auto") (not .Values.vault.enabled) }}
+{{- fail "vault.enabled=false conflicts with config.auth.multi.setup=auto. The Vault sub-chart is required for automatic setup. Either set vault.enabled=true or switch to setup=manual." }}
+{{- end }}
+{{- end }}
