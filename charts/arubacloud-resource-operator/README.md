@@ -89,18 +89,42 @@ helm upgrade --install arubacloud-operator arubacloud/arubacloud-resource-operat
 
 #### Multi-Tenant Installation (Vault-based)
 
-For multi-tenant deployments using HashiCorp Vault:
+Multi-tenant mode uses HashiCorp Vault AppRole authentication to retrieve per-tenant credentials. Two sub-modes control how Vault is provisioned:
+
+| `config.auth.multi.setup` | `vault.enabled` | Description |
+|---|---|---|
+| `auto` (default) | `true` | Chart installs Vault in dev mode and configures it automatically. For development/demo only. |
+| `manual` | `false` | You provide a pre-existing Vault instance. All Vault parameters must be supplied. |
+
+##### Setup = manual (bring your own Vault)
+
+Use this when Vault is already running outside the cluster (or managed separately):
 
 ```bash
 helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
   --namespace aruba-system \
   --create-namespace \
   --set config.auth.mode=multi \
+  --set config.auth.multi.setup=manual \
+  --set vault.enabled=false \
   --set config.auth.multi.vault.address=<vault-address> \
-  --set config.auth.multi.vault.rolePath=<vault-role-path> \
+  --set config.auth.multi.vault.kvMount=<kv-mount> \
+  --set config.auth.multi.vault.rolePath=<approle-path> \
   --set config.auth.multi.vault.roleId=<vault-role-id> \
-  --set config.auth.multi.vault.roleSecret=<vault-role-secret> \ 
-  --set config.auth.multi.vault.kvMount=<vault-role-kvMount>
+  --set config.auth.multi.vault.roleSecret=<vault-role-secret>
+```
+
+##### Setup = auto (chart-managed Vault, dev/demo only)
+
+Use this to let the chart install and configure Vault automatically. **Not for production.**
+
+```bash
+helm install arubacloud-operator arubacloud/arubacloud-resource-operator \
+  --namespace aruba-system \
+  --create-namespace \
+  --set config.auth.mode=multi \
+  --set config.auth.multi.setup=auto \
+  --set vault.enabled=true
 ```
 
 ##### Alternative: Using Secret References for Vault AppRole Credentials
@@ -258,13 +282,17 @@ _output:_
 | `config.auth.mode` | Authentication mode: `single` or `multi` | `single` |
 | `config.auth.single.clientId` | OAuth client ID (required when mode is `single`) | `""` |
 | `config.auth.single.clientSecret` | OAuth client secret (required when mode is `single`) | `""` |
-| `config.auth.multi.vault.address` | Vault server address (used when mode is `multi`) | `http://vault0.default.svc.cluster.local:8200` |
-| `config.auth.multi.vault.kvMount` | Vault KV mount path (used when mode is `multi`) | `kw` |
-| `config.auth.multi.vault.rolePath` | Vault AppRole path (used when mode is `multi`) | `approle` |
+| `config.auth.multi.setup` | Vault provisioning mode: `manual` (bring your own Vault) or `auto` (chart installs Vault, dev/demo only) | `auto` |
+| `config.auth.multi.vault.address` | Vault server address (required when mode is `multi`) | `http://vault:8200` |
+| `config.auth.multi.vault.kvMount` | Vault KV mount path (required when mode is `multi`) | `kv` |
+| `config.auth.multi.vault.rolePath` | Vault AppRole path (required when mode is `multi`) | `approle` |
 | `config.auth.multi.vault.roleId` | Vault AppRole ID (required when mode is `multi` and `roleIdFrom` is not set) | `""` |
 | `config.auth.multi.vault.roleSecret` | Vault AppRole secret (required when mode is `multi` and `roleSecretFrom` is not set) | `""` |
 | `config.auth.multi.vault.roleIdFrom.secretKeyRef` | Reference to existing secret for Vault AppRole ID (alternative to `roleId`) | - |
 | `config.auth.multi.vault.roleSecretFrom.secretKeyRef` | Reference to existing secret for Vault AppRole secret (alternative to `roleSecret`) | - |
+| `config.auth.multi.vault.auto.namespace` | Kubernetes namespace where Vault is deployed (used when `setup=auto`) | `vault` |
+| `config.auth.multi.vault.auto.helmChartVersion` | Vault Helm chart version to install (used when `setup=auto`) | `0.32.0` |
+| `config.auth.multi.vault.auto.devRootToken` | Vault dev root token for initial configuration (used when `setup=auto`) | `root` |
 
 ### Controller Parameters
 
@@ -298,6 +326,16 @@ _output:_
 |---------------------|--------------------------------------------------|--------------------------------|
 | `metricsService.type` | Metrics service type | `ClusterIP` |
 | `metricsService.ports` | Metrics service ports | (see values.yaml) |
+
+### Vault Sub-chart Parameters
+
+These parameters control the Vault sub-chart, which is only used when `config.auth.multi.setup=auto`. When using `setup=manual`, set `vault.enabled=false`.
+
+| Name                | Description                                      | Default                        |
+|---------------------|--------------------------------------------------|--------------------------------|
+| `vault.enabled` | Install Vault as a sub-chart. Must be `true` for `setup=auto` and `false` for `setup=manual`. | `true` |
+| `vault.server.dev.enabled` | Run Vault in dev mode (in-memory, no persistence). **Not for production.** | `true` |
+| `vault.server.dev.devRootToken` | Dev root token | `root` |
 
 Refer to the [values.yaml](values.yaml) file for a complete list of configurable parameters.
 
@@ -418,6 +456,9 @@ kubectl logs -n aruba-system -l control-plane=controller-manager -f
 - **Resource creation failures**: Check operator logs for detailed error messages. Ensure API endpoints are correct and accessible.
 - **Missing CRDs**: If you disabled automatic CRD installation (`crds.enabled=false`), ensure you've manually installed the `arubacloud-resource-operator-crd` chart.
 - **CRD version mismatch**: If CRDs were installed separately, ensure they match the version expected by the operator.
+- **`vault.enabled=true conflicts with config.auth.multi.setup=manual`**: You set `setup=manual` but left `vault.enabled=true` (the default). Add `--set vault.enabled=false` to your install command.
+- **`vault.enabled=false conflicts with config.auth.multi.setup=auto`**: You set `vault.enabled=false` but left `setup=auto` (the default). Either add `--set vault.enabled=true` or switch to `--set config.auth.multi.setup=manual` and supply your own Vault parameters.
+- **Operator pod stuck in `Init:0/1`** (setup=auto): The `wait-for-vault-credentials` initContainer is waiting for the vault-config Job to patch the operator Secret. Check the Job logs: `kubectl logs -n aruba-system -l app=vault-config`.
 
 ## Uninstall
 
