@@ -83,8 +83,8 @@ helm upgrade --install arubacloud-operator arubacloud/arubacloud-resource-operat
   --create-namespace \
   --set controller.manager.image.tag=v0.0.1-alpha4 \
   --set config.auth.mode=single \
-  --set config.auth.single.clientId=cmp-4adf9b35-3d98-4233-a863-8ad48cd2a2f5 \
-  --set config.auth.single.clientSecret=i3HaYhQHDhczUWWaUYUeL2tZffeHzo4F
+  --set config.auth.single.clientId=<your-client-id> \
+  --set config.auth.single.clientSecret=<your-client-secret>
 ```
 
 #### Multi-Tenant Installation (Vault-based)
