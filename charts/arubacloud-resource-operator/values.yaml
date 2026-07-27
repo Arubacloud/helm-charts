@@ -20,6 +20,8 @@ config:
       vault:
         address: http://vault:8200
         kvMount: kv
+        kvPrefix: ""
+        roleNamespace: ""
         rolePath: approle
         # Direct string values (default method)
         roleId: ""
