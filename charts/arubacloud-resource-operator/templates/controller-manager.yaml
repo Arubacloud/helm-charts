@@ -10,7 +10,9 @@ data:
   realm-api: {{ .Values.config.auth.realm | quote }}
 {{- if eq .Values.config.auth.mode "multi" }}
   kv-mount: {{ .Values.config.auth.multi.vault.kvMount | quote }}
+  kv-prefix: {{ .Values.config.auth.multi.vault.kvPrefix | default "" | quote }}
   role-path: {{ .Values.config.auth.multi.vault.rolePath | quote }}
+  role-namespace: {{ .Values.config.auth.multi.vault.roleNamespace | default "" | quote }}
   vault-enabled: "true"
   vault-address: {{ .Values.config.auth.multi.vault.address | quote }}
 {{- else }}
